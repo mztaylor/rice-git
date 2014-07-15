@@ -147,8 +147,8 @@
             <phase>process-resources</phase>
             <configuration>
               <tasks>
-                <echo>Extracting Help Files</echo>
-                <unzip src="${basedir}/src/main/help/RiceHelp.zip" dest="${project.build.directory}/help/kr/static/help/" />
+                <echo>(skipping) Extracting Help Files</echo>
+                <!-- unzip src="${basedir}/src/main/help/RiceHelp.zip" dest="${project.build.directory}/help/kr/static/help/" -->
               </tasks>
             </configuration>
             <goals>
