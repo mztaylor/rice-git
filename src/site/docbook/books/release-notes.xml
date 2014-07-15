@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  
+    Copyright 2005-2013 The Kuali Foundation
+    
+    Licensed under the Educational Community License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl2.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+-->
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0">
+  <info>
+    <title>Kuali Rice ${project.version} Release Notes</title>
+    <edition>${project.version}</edition>
+    <pubdate>Released: ${docbook.build.timestamp}</pubdate>
+  </info>
+  <section xml:id="overview" xreflabel="Overview">
+    <title>Overview</title>
+    <para>Welcome to Rice ${project.version}! </para>
+    <section>
+      <title>Release Highlights</title>
+      <para>This version of Rice is a patch release consisting of security fixes as well as bug
+        fixes and small items needed by Kuali application partners. There are no database changes
+        and it should be a drop-in replacement.</para>
+    </section>
+    <section>
+      <title>Download</title>
+      <para>Kuali Rice ${project.version} can be downloaded from the Rice website at <link xlink:show="new" xlink:href="http://kuali.org/rice/download">http://kuali.org/rice/download</link>.</para>
+      <para>There are three different distributions of Rice available: source, binary and
+        server. Please read the <link xlink:href="http://site.kuali.org/rice/${project.version}/reference/html/IG.html">Installation Guide</link> for
+        more details on each of these distributions.</para>
+      <para>Applications can also consume Rice from the maven site at <link
+        xlink:href="http://search.maven.org/#search|ga|1|org.kuali.rice"
+        >http://search.maven.org/#search|ga|1|org.kuali.rice</link>.</para>
+    </section>
+    <section>
+      <title>Documentation</title>
+      <para>API Documentation can be found at <link xlink:show="new" xlink:href="http://site.kuali.org/rice/${project.version}/apidocs/index.html">http://site.kuali.org/rice/${project.version}/apidocs/index.html</link></para>
+      <para>Formal documentation can be found at <link xlink:show="new"
+        xlink:href="http://site.kuali.org/rice/${project.version}/reference/html/index.html"
+        >http://site.kuali.org/rice/${project.version}/reference/html/index.html</link>.
+        This documentation is still in the process of review and update  which will continue
+        through subsequent releases, so please follow the notes in each document to report
+        any outdated information.</para>
+    </section>
+    <section>
+      <title>Contact</title>
+      <para>If you encounter any difficulty, please don't hesitate to contact the Rice team on
+        our public collaboration mailing list at <email>rice.collab@kuali.org</email>.
+        Please indicate that you are using the ${project.version} version of Rice.</para>
+    </section>
+  </section>
+  <section xml:id="items_addressed_in_rice">
+    <title>Items Addressed in Rice ${project.version}</title>
+    
+    <section>
+      <title>Bug Fix</title>
+      <para>
+        <itemizedlist>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-9562'>KULRICE-9562</link>] - Using some lookup operators on their own result in an ArrayIndexOutOfBoundsException</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-9646'>KULRICE-9646</link>] - IdentityServiceImpl.updatePrincipal should retrieve the original principal by ID instead of name</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-9648'>KULRICE-9648</link>] - IdentityServiceImpl.createEntity is not creating entity affiliation and employment info correctly</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-10037'>KULRICE-10037</link>] - CSV,XML,XLS file download buttons on collections does not work on inquiry screen</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12252'>KULRICE-12252</link>] - Table line select field does not include object binding path set on the group</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12477'>KULRICE-12477</link>] - Update DocumentRefreshQueueImpl to properly delete old action requests</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12502'>KULRICE-12502</link>] - Add null checks to allow processing to continue when certain data does not exist.</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12513'>KULRICE-12513</link>] - AFT Failure ServerSideTestViewAft - PreRequisite constraint fails</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12546'>KULRICE-12546</link>] - Actions method to calls within rich messages should be accessible by default</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12590'>KULRICE-12590</link>] - KRAD Sample App does not refresh database</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12608'>KULRICE-12608</link>] - Lookup Criteria should be functioning even for secure fields</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12614'>KULRICE-12614</link>] - KRMS - Terms do not persist</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12630'>KULRICE-12630</link>] - Fix style issue with create new link on lookups</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12670'>KULRICE-12670</link>] - Input field not rendering on collection add line item</para>
+          </listitem>
+        </itemizedlist>
+      </para>
+    </section>
+    
+    
+    <section>
+      <title>Task</title>
+      <para>
+        <itemizedlist>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-9525'>KULRICE-9525</link>] - Document best-practices for using JPA with Kuali Rice</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12430'>KULRICE-12430</link>] - Fix excessive memory usage on requests with many action requests</para>
+          </listitem>
+          <listitem>
+            <para>[<link xlink:href='https://jira.kuali.org/browse/KULRICE-12491'>KULRICE-12491</link>] - Performance improvement for readXml in XmlHelper</para>
+          </listitem>
+        </itemizedlist>
+      </para>
+    </section>
+    
+    
+    
+    
+  </section>
+</article>
