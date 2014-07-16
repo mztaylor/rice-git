@@ -46,6 +46,7 @@
   </ciManagement>
 
   <properties>
+    <project.scm.vendor>git</project.scm.vendor>
     <tools.jar.path>${java.home}/../lib/tools.jar</tools.jar.path>
 
     <!-- These properties modify the release process -->
@@ -2487,9 +2488,9 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:${project.scm.vendor}:https://svn.kuali.org/repos/rice/tags/rice-2.5.0-M4</connection>
-    <developerConnection>scm:${project.scm.vendor}:https://svn.kuali.org/repos/rice/tags/rice-2.5.0-M4</developerConnection>
-    <url>https://svn.kuali.org/repos/rice/tags/rice-2.5.0-M4</url>
+    <connection>scm:${project.scm.vendor}:https://github.com/mztaylor/rice-git.git</connection>
+    <developerConnection>scm:${project.scm.vendor}:https://github.com/mztaylor/rice-git.git</developerConnection>
+    <url>https://github.com/mztaylor/rice-git</url>
   </scm>
 
 </project>
