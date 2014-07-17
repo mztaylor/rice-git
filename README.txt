@@ -14,7 +14,6 @@
     limitations under the License.
 ====
 
-
 README.txt
 Kuali Rice ${project.version}
 ${readme.build.timestamp}
