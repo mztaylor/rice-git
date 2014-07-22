@@ -2488,8 +2488,8 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:${project.scm.vendor}:https://github.com/mztaylor/rice-git.git</connection>
-    <developerConnection>scm:${project.scm.vendor}:https://github.com/mztaylor/rice-git.git</developerConnection>
+    <connection>scm:${project.scm.vendor}:git@github.com:mztaylor/rice-git.git</connection>
+    <developerConnection>scm:${project.scm.vendor}:git@github.com:mztaylor/rice-git.git</developerConnection>
     <url>https://github.com/mztaylor/rice-git</url>
   </scm>
 
