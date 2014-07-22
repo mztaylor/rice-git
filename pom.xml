@@ -28,7 +28,7 @@
   <packaging>pom</packaging>
   <name>Rice</name>
   <inceptionYear>2005</inceptionYear>
-  <version>2.5.0-M6-GIT-M2-SNAPSHOT</version>
+  <version>2.5.0-M6-GIT-M2</version>
   <description>
     The Kuali Rice effort provides an enterprise class middleware suite of integrated products that allows
     both Kuali and non-Kuali applications
@@ -2491,7 +2491,7 @@
     <connection>scm:${project.scm.vendor}:git@github.com:mztaylor/rice-git.git</connection>
     <developerConnection>scm:${project.scm.vendor}:git@github.com:mztaylor/rice-git.git</developerConnection>
     <url>https://github.com/mztaylor/rice-git</url>
-    <tag>HEAD</tag>
+    <tag>rice-2.5.0-M6-GIT-M2</tag>
   </scm>
 
 </project>
