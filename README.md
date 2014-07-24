@@ -14,7 +14,7 @@
     limitations under the License.
 ====
 
-README.txt
+README.md
 Kuali Rice ${project.version}
 ${readme.build.timestamp}
 
@@ -47,4 +47,3 @@ References and Links
 ----- 
 Rice documentation: http://rice.kuali.org/docs 
 Rice distribution download:  http://rice.kuali.org/download
-
