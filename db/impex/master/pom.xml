@@ -76,65 +76,12 @@
         </plugins>
       </build>
     </profile>
+
+    <!-- Commits the generated XML to version control -->
     <profile>
-      <id>dataset</id>
+      <id>commit</id>
       <properties>
-        <impex.username>RICE${dataset.schema.prefix}${dataset.schema.suffix}</impex.username>
-        <impex.password>RICE${dataset.schema.prefix}${dataset.schema.suffix}</impex.password>
-        <impex.database>RICE${dataset.schema.prefix}${dataset.schema.suffix}</impex.database>
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.kuali.maven.plugins</groupId>
-            <artifactId>sql-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>cleanup</id>
-                <phase>install</phase>
-                <goals>
-                  <goal>execute</goal>
-                </goals>
-                <configuration>
-                  <orderFile>NONE</orderFile>
-                  <resourceLocations>
-                    <resourceLocation>${dataset.cleanup.1}</resourceLocation>
-                    <resourceLocation>${dataset.cleanup.2}</resourceLocation>
-                  </resourceLocations>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>client</id>
-      <properties>
-        <dataset.schema.prefix>CLIENT</dataset.schema.prefix>
-        <dataset.script>client</dataset.script>
-      </properties>
-    </profile>
-    <profile>
-      <id>server</id>
-      <properties>
-        <dataset.schema.prefix>SERVER</dataset.schema.prefix>
-        <dataset.script>server</dataset.script>
-      </properties>
-    </profile>
-    <profile>
-      <id>demo</id>
-      <properties>
-        <dataset.schema.suffix>DEMO</dataset.schema.suffix>
-        <dataset.cleanup.1>classpath:demo-${dataset.script}-dataset-cleanup.sql</dataset.cleanup.1>
-      </properties>
-    </profile>
-    <profile>
-      <id>bootstrap</id>
-      <properties>
-        <dataset.schema.suffix>BOOTSTRAP</dataset.schema.suffix>
-        <dataset.cleanup.1>classpath:demo-${dataset.script}-dataset-cleanup.sql</dataset.cleanup.1>
-        <dataset.cleanup.2>classpath:bootstrap-${dataset.script}-dataset-cleanup.sql</dataset.cleanup.2>
+        <scm.phase>process-resources</scm.phase>
       </properties>
     </profile>
   </profiles>

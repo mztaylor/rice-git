@@ -57,6 +57,7 @@
                     <annotatedClass>org.kuali.rice.xml.spring.IngestXmlExecConfig</annotatedClass>
                     <annotatedClass>org.kuali.rice.xml.spring.LaunchRiceConfig</annotatedClass>
                   </annotatedClasses>
+                  <activeProfiles>${db.profile}</activeProfiles>
                 </configuration>
               </execution>
             </executions>

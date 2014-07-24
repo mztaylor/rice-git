@@ -48,6 +48,8 @@
         </plugins>
       </build>
     </profile>
+
+    <!-- Commits the generated XML to version control -->
     <profile>
       <id>commit</id>
       <properties>
