@@ -17,26 +17,26 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <name>Rice Impex Master</name>
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.kuali.rice</groupId>
     <artifactId>rice-impex</artifactId>
     <version>2.5.0-git3-SNAPSHOT</version>
   </parent>
+
   <artifactId>rice-impex-master</artifactId>
+
+  <name>Rice Impex Master</name>
+
   <properties>
-    <db.branch.qualifier>${project.version.sanitized}</db.branch.qualifier>
     <impex.username>RICE</impex.username>
-    <impex.password>RICE</impex.password>
+    <impex.password>${impex.username}</impex.password>
+    <impex.database>${impex.username}</impex.database>
   </properties>
+
   <profiles>
-    <profile>
-      <id>commit</id>
-      <properties>
-        <impex.invalid.phase>none</impex.invalid.phase>
-      </properties>
-    </profile>
+    <!-- Defines the master impex database name -->
     <profile>
       <id>master</id>
       <properties>
@@ -45,22 +45,10 @@
         <impex.database>${impex.username}</impex.database>
       </properties>
     </profile>
+
+    <!-- Exports a database to the impex format on disk -->
     <profile>
-      <id>commitmaster</id>
-      <properties>
-        <impex.invalid.phase>process-resources</impex.invalid.phase>
-        <scm.phase>process-resources</scm.phase>
-      </properties>
-    </profile>
-    <profile>
-      <id>exportmaster</id>
-      <properties>
-        <export.db.username>RICE_${db.branch.qualifier}</export.db.username>
-        <export.db.password>${export.db.username}</export.db.password>
-        <impex.username>${export.db.username}</impex.username>
-        <impex.password>${export.db.password}</impex.password>
-        <impex.database>${export.db.username}</impex.database>
-      </properties>
+      <id>export</id>
       <build>
         <plugins>
           <plugin>
