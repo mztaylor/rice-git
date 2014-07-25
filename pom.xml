@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.kuali.pom</groupId>
     <artifactId>kuali-common</artifactId>
-    <version>4.0.2</version>
+    <version>4.2.0</version>
   </parent>
   <groupId>org.kuali.rice</groupId>
   <artifactId>rice</artifactId>
@@ -2488,10 +2488,10 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:${project.scm.vendor}:git@github.com:mztaylor/rice-git.git</connection>
-    <developerConnection>scm:${project.scm.vendor}:git@github.com:mztaylor/rice-git.git</developerConnection>
-    <url>https://github.com/mztaylor/rice-git</url>
-    <tag>HEAD</tag>
+    <connection>scm:git:git@github.com:mztaylor/rice-git.git</connection>
+    <developerConnection>scm:git:git@github.com:mztaylor/rice-git.git</developerConnection>
+    <url>https://github.com/mztaylor/rice-git/tree/${project.scm.tag}</url>
+    <tag>master</tag>
   </scm>
 
 </project>
