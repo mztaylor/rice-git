@@ -73,26 +73,12 @@ public class ComponentAft extends ConfigComponentAftBase {
     }
 
     @Test
-    public void testCreateNewCancelComponentBookmark() throws Exception {
-        testCreateNewCancel();
-        passed();
-    }
-
-    @Test
-    public void testComponentCreateNewCancelComponentNav() throws Exception {
-        testCreateNewCancel();
-        passed();
-    }
-
-    @Test
     public void testComponentParameterBookmark() throws Exception {
         testComponentParameter();
-        passed();
     }
 
     @Test
     public void testComponentParameterNav() throws Exception {
         testComponentParameter();
-        passed();
     }
 }

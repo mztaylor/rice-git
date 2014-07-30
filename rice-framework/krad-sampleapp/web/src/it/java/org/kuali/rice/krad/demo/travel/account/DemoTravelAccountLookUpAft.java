@@ -16,10 +16,9 @@
 package org.kuali.rice.krad.demo.travel.account;
 
 import org.kuali.rice.krad.demo.ViewDemoAftBase;
-import org.junit.Ignore;
-import org.kuali.rice.testtools.selenium.WebDriverLegacyITBase;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author Kuali Rice Team (rice.collab@kuali.org)
@@ -58,7 +57,7 @@ public class DemoTravelAccountLookUpAft extends ViewDemoAftBase {
 
     @Override
     protected void navigate() throws Exception {
-        waitAndClickById("Demo-DemoLink", "");
+        waitAndClickDemoLink();
         waitAndClickByLinkText("Travel Account Lookup");
     }
 
@@ -68,7 +67,7 @@ public class DemoTravelAccountLookUpAft extends ViewDemoAftBase {
         waitAndClickButtonByText(SEARCH);
         waitForElementPresentByXpath("//a[contains(text(), 'a1')]");
         waitAndClickButtonByText(CLEAR_VALUES);
-        
+
         //Inquiry check on Travel Account Number
         waitAndTypeByName(TRAVEL_ACCOUNT_NUMBER_FIELD, "a1");
         waitAndClickByXpath("//button[@title='Direct Inquiry']");
@@ -77,14 +76,14 @@ public class DemoTravelAccountLookUpAft extends ViewDemoAftBase {
         waitForTextPresent("Travel Account 1");
         waitAndClickButtonByText("Close");
         selectTopFrame();
-        
+
         //Search by Travel Account Name
         waitAndTypeByName("lookupCriteria[name]","Travel Account 1");
         waitAndClickButtonByText(SEARCH);
         waitForElementPresentByXpath("//a[contains(text(),'a1')]");
         waitForTextPresent("Travel Account 1");
         waitAndClickButtonByText(CLEAR_VALUES);
-         
+
         //Search by Travel Account Type Code
         testSearchAndSelect("CAT");
         waitAndClickButtonByText(SEARCH);
@@ -96,6 +95,7 @@ public class DemoTravelAccountLookUpAft extends ViewDemoAftBase {
         waitAndClickButtonByText(CLEAR_VALUES);
         testSearchAndSelect("IAT");
         waitAndClickButtonByText(SEARCH);
+        waitForProgressLoading();
         waitForTextPresent("IAT - Income");
         waitAndClickButtonByText(CLEAR_VALUES);
         
@@ -106,6 +106,7 @@ public class DemoTravelAccountLookUpAft extends ViewDemoAftBase {
         waitForElementPresentByXpath("//input[@name='lookupCriteria[accountTypeCode]' and @value='CAT']");
         waitAndClickButtonByText("Close");
         selectTopFrame();
+        waitAndClickButtonByText(CLEAR_VALUES);
 
         //Search by Travel Account Date Created
         waitAndTypeByName("lookupCriteria[createDate]", "06/01/2014");
@@ -131,6 +132,7 @@ public class DemoTravelAccountLookUpAft extends ViewDemoAftBase {
         waitAndTypeByName(fieldName,"\"/><script>alert('!')</script>");
         waitAndClickButtonByText(SEARCH);
         Thread.sleep(1000);
+        
         if(isAlertPresent())    {
             jiraAwareFail(fieldName + " caused XSS.");
         }
@@ -149,6 +151,9 @@ public class DemoTravelAccountLookUpAft extends ViewDemoAftBase {
     }
 
     private void testTravelAccountLookUpDocumentLocking() throws Exception {
+
+        String documentId = "";
+
         waitAndTypeByName(TRAVEL_ACCOUNT_NUMBER_FIELD, "a4");
     	waitAndClickButtonByText(SEARCH);
     	waitAndClickByLinkText("edit");
@@ -158,6 +163,7 @@ public class DemoTravelAccountLookUpAft extends ViewDemoAftBase {
     	gotoLightBox();
     	waitAndClickButtonByText(SEARCH);
     	waitAndClickByLinkText("return value");
+//        waitAndClickByLinkText("Ad Hoc Recipients");
     	waitAndClickByXpath("//button[@id='Uif-AdHocPersonCollection_add']");
         waitAndClickAdHocGroupAdd();
     	gotoLightBox();
@@ -166,29 +172,33 @@ public class DemoTravelAccountLookUpAft extends ViewDemoAftBase {
     	waitAndClickByXpath("//button[@id='CollectionGroup_AdHocWorkgroup_add']");
         waitAndClickSubmitByText();
         waitAndClickConfirmationOk();
+        waitForProgressLoading();
+
     	if(waitForIsTextPresent("Document was successfully submitted.")) {
+
+            //get document number so that we can unlock after
+            WebElement webElement = findElement(By.xpath("./html/body/form/div/header/div/table/tbody/tr[1]/td[1]/div"));
+            documentId = webElement.getText();
+
     		navigate();
             waitAndTypeByName(TRAVEL_ACCOUNT_NUMBER_FIELD, "a4");
     		waitAndClickButtonByText(SEARCH);
         	waitAndClickByLinkText("edit");
         	waitAndTypeByName("document.documentHeader.documentDescription","Document Locking Description");
-        	waitAndClickByLinkText("Ad Hoc Recipients");
-            waitAndClickAdHocPersonAdd();
-        	gotoLightBox();
-        	waitAndClickButtonByText(SEARCH);
-        	waitAndClickByLinkText("return value");
-        	waitAndClickByXpath("//button[@id='Uif-AdHocPersonCollection_add']");
-            waitAndClickAdHocGroupAdd();
-        	gotoLightBox();
-        	waitAndClickButtonByText(SEARCH);
-        	waitAndClickByLinkText("return value");
-        	waitAndClickByXpath("//button[@id='CollectionGroup_AdHocWorkgroup_add']");
             waitAndClickSubmitByText();
-    		waitForTextPresent("This document cannot be Saved or Routed");
+            waitAndClickConfirmationOk();
+            waitForProgressLoading();
     	}
-    	else{
-            waitForTextPresent("This document cannot be Saved or Routed");
-    	}
+
+        waitForTextPresent("This document cannot be Saved or Routed");
+
+        //unlock record
+        if(documentId != "") {
+            open(getBaseUrlString() + "/kew/DocHandler.do?docId=" + documentId + "&command=displayActionListView");
+            waitAndClickByXpath("/html/body/form/div/div[2]/main/section[7]/header/h3/a/span/span[1]");
+            waitAndTypeByXpath("/html/body/form/div/div[2]/main/section[7]/div/div[1]/textarea", "blocking test");
+            waitAndClickByXpath("/html/body/form/div/div[2]/main/section[7]/div/div[2]/button[2]");
+        }
     }
 
     @Test
@@ -210,36 +220,37 @@ public class DemoTravelAccountLookUpAft extends ViewDemoAftBase {
     	waitAndClickByXpath("//button[@class='btn btn-default uif-action icon-search']");
     	gotoLightBox();
         waitAndClickSearchByText();
+        
     	if(selectorText.equalsIgnoreCase("CAT")){
     		waitAndClickByXpath("//table/tbody/tr[1]/td/div/fieldset/div/a");
     	}
+    	
     	if(selectorText.equalsIgnoreCase("EAT")){
     		waitAndClickByXpath("//table/tbody/tr[2]/td/div/fieldset/div/a");
     	}
+    	
     	if(selectorText.equalsIgnoreCase("IAT")){
     		waitAndClickByXpath("//table/tbody/tr[3]/td/div/fieldset/div/a");
     	}
     }
 
-    @Test
-    public void testTravelAccountLookUpNav() throws Exception {
-        testTravelAccountLookUp();
-        testXss();
-        passed();
-    }
+        @Test
+        public void testTravelAccountLookUpNav() throws Exception {
+            testTravelAccountLookUp();
+            testXss();
+            passed();
+        }
 
-    @Test
-    public void testTravelAccountLookUpDocumentLockingBookmark() throws Exception {
-        testTravelAccountLookUpDocumentLocking();
-        passed();
-    }
+        @Test
+        public void testTravelAccountLookUpDocumentLockingBookmark() throws Exception {
+            testTravelAccountLookUpDocumentLocking();
+            passed();
+        }
 
-    @Test
-    public void testTravelAccountLookUpDocumentLockingNav() throws Exception {
-        testTravelAccountLookUpDocumentLocking();
-        passed();
-    }
-
-
+        @Test
+        public void testTravelAccountLookUpDocumentLockingNav() throws Exception {
+            testTravelAccountLookUpDocumentLocking();
+            passed();
+        }
 }
 

@@ -51,6 +51,7 @@ import org.kuali.rice.krad.uif.control.TextAreaControl;
 import org.kuali.rice.krad.uif.control.TextControl;
 import org.kuali.rice.krad.uif.control.UifKeyValuesFinder;
 import org.kuali.rice.krad.uif.element.Action;
+import org.kuali.rice.krad.uif.element.FieldValidationMessages;
 import org.kuali.rice.krad.uif.element.Label;
 import org.kuali.rice.krad.uif.element.Link;
 import org.kuali.rice.krad.uif.element.Message;
@@ -73,6 +74,7 @@ import org.kuali.rice.krad.uif.widget.Suggest;
 import org.kuali.rice.krad.util.KRADConstants;
 import org.kuali.rice.krad.util.KRADUtils;
 import org.kuali.rice.krad.web.form.MaintenanceDocumentForm;
+import org.kuali.rice.krad.web.form.UifFormBase;
 
 /**
  * Field that encapsulates data input/output captured by an attribute within the
@@ -110,13 +112,16 @@ public class InputFieldBase extends DataFieldBase implements InputField {
     // display props
     private Control control;
 
+    private boolean inlineEdit;
+    private boolean ajaxInlineEdit;
+
     private KeyValuesFinder optionsFinder;
 
     private boolean uppercaseValue;
     private boolean disableNativeAutocomplete;
 
     @DelayedCopy
-    private ValidationMessages validationMessages;
+    private FieldValidationMessages validationMessages;
 
     // messages
     private String constraintText;
@@ -183,7 +188,7 @@ public class InputFieldBase extends DataFieldBase implements InputField {
             Component parent = ViewLifecycle.getPhase().getParent();
             setReadOnly(parent == null ? null : parent.getReadOnly());
         }
-        
+
         super.afterEvaluateExpression();
     }
 
@@ -293,8 +298,11 @@ public class InputFieldBase extends DataFieldBase implements InputField {
 
         this.addDataAttribute(UifConstants.DataAttributes.ROLE, UifConstants.RoleTypes.INPUT_FIELD);
 
+        boolean ajaxInlineEditRefresh = ajaxInlineEdit && ((UifFormBase)model).getUpdateComponentId() != null &&
+                ((UifFormBase)model).getUpdateComponentId().equals(this.getId());
+
         // if read only or the control is null no input can be given so no need to setup validation
-        if (Boolean.TRUE.equals(getReadOnly()) || getControl() == null) {
+        if ((Boolean.TRUE.equals(getReadOnly()) && !inlineEdit && !ajaxInlineEditRefresh) || getControl() == null) {
             return;
         }
 
@@ -369,8 +377,17 @@ public class InputFieldBase extends DataFieldBase implements InputField {
 
         ClientValidationUtils.processAndApplyConstraints(this, view, model);
 
+        if (inlineEdit || ajaxInlineEdit) {
+            this.addDataAttribute(UifConstants.DataAttributes.INLINE_EDIT, "true");
+        }
+
         // Generate validation messages
         if (validationMessages != null) {
+            // Messages will not use tooltip for inline edit cases
+            if (inlineEdit || ajaxInlineEdit) {
+                validationMessages.setUseTooltip(false);
+            }
+
             validationMessages.generateMessages(view, model, this);
         }
 
@@ -417,8 +434,8 @@ public class InputFieldBase extends DataFieldBase implements InputField {
         viewPostMetadata.addComponentPostData(this, UifConstants.PostMetadata.INPUT_FIELD_IS_UPPERCASE,
                 isUppercaseValue());
 
-        if ((isRender() || StringUtils.isNotBlank(getProgressiveRender())) && !isHidden() && !Boolean.TRUE.equals(
-                getReadOnly())) {
+        if ((isRender() || StringUtils.isNotBlank(getProgressiveRender())) && !isHidden() && (!Boolean.TRUE.equals(
+                getReadOnly()) || inlineEdit || ajaxInlineEdit)) {
             viewPostMetadata.addAccessibleBindingPath(getBindingInfo().getBindingPath());
         }
     }
@@ -701,10 +718,40 @@ public class InputFieldBase extends DataFieldBase implements InputField {
     /**
      * {@inheritDoc}
      */
+    @BeanTagAttribute
+    public boolean isInlineEdit() {
+        return inlineEdit;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setInlineEdit(boolean inlineEdit) {
+        this.inlineEdit = inlineEdit;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @BeanTagAttribute
+    public boolean isAjaxInlineEdit() {
+        return ajaxInlineEdit;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setAjaxInlineEdit(boolean ajaxInlineEdit) {
+        this.ajaxInlineEdit = ajaxInlineEdit;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @ViewLifecycleRestriction
     @BeanTagAttribute
-    public ValidationMessages getValidationMessages() {
+    public FieldValidationMessages getValidationMessages() {
         return this.validationMessages;
     }
 
@@ -712,7 +759,7 @@ public class InputFieldBase extends DataFieldBase implements InputField {
      * {@inheritDoc}
      */
     @Override
-    public void setValidationMessages(ValidationMessages validationMessages) {
+    public void setValidationMessages(FieldValidationMessages validationMessages) {
         this.validationMessages = validationMessages;
     }
 
@@ -1297,7 +1344,7 @@ public class InputFieldBase extends DataFieldBase implements InputField {
 
     /**
      * Determines wheter or not to create an automatic quickfinder widget for this field within the current lifecycle.
-     * 
+     *
      * @return True if an automatic quickfinder widget should be created for this field on the current lifecycle.
      */
     protected boolean hasAutoQuickfinderRelationship() {

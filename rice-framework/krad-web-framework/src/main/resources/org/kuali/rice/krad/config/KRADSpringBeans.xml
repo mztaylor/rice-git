@@ -109,6 +109,7 @@
         <entry key="java.util.Date" value="dateEditor" />
         <entry key="java.util.Calendar" value="calendarEditor" />
         <entry key="java.sql.Timestamp" value="timestampEditor" />
+        <entry key="org.joda.time.DateTime" value="dateTimeEditor" />
         <entry key="boolean" value="booleanEditor" />
         <entry key="java.lang.Boolean" value="booleanEditor" />
         <entry key="java.math.BigDecimal" value="decimalEditor" />
@@ -575,6 +576,10 @@
   </bean>
 
   <bean id="refreshControllerService" class="org.kuali.rice.krad.web.service.impl.RefreshControllerServiceImpl">
+    <property name="modelAndViewService" ref="modelAndViewService"/>
+  </bean>
+
+  <bean id="saveControllerService" class="org.kuali.rice.krad.web.service.impl.SaveControllerServiceImpl">
     <property name="modelAndViewService" ref="modelAndViewService"/>
   </bean>
 

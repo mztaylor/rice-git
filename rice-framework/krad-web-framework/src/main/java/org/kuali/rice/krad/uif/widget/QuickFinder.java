@@ -71,7 +71,9 @@ public class QuickFinder extends WidgetBase implements LifecycleEventListener {
     private Map<String, String> additionalLookupParameters;
 
     private Action quickfinderAction;
-    private LightBox lightBox;
+
+    private String lookupDialogId;
+    private boolean openInDialog;
 
     // lookup view options
     private Boolean renderReturnLink;
@@ -92,6 +94,7 @@ public class QuickFinder extends WidgetBase implements LifecycleEventListener {
 
         fieldConversions = new HashMap<String, String>();
         lookupParameters = new HashMap<String, String>();
+        lookupDialogId = "";
     }
 
     /**
@@ -390,9 +393,9 @@ public class QuickFinder extends WidgetBase implements LifecycleEventListener {
     protected void setupQuickfinderAction(View view, Object model, LifecycleElement parent) {
         quickfinderAction.setId(getId() + UifConstants.IdSuffixes.ACTION);
 
-        if ((lightBox != null) && lightBox.isRender()) {
-            String lightboxScript = UifConstants.JsFunctions.CREATE_LIGHTBOX_POST + "(\"" + quickfinderAction.getId()
-                    + "\"," + lightBox.getTemplateOptionsJSString() + "," + returnByScript + ");";
+        if (openInDialog) {
+            String lightboxScript = UifConstants.JsFunctions.SHOW_LOOKUP_DIALOG + "(\"" + quickfinderAction.getId()
+                    + "\"," + returnByScript + ",\"" + lookupDialogId + "\");";
 
             quickfinderAction.setActionScript(lightboxScript);
         }
@@ -864,23 +867,41 @@ public class QuickFinder extends WidgetBase implements LifecycleEventListener {
     }
 
     /**
-     * Lightbox widget that will be used to view the invoked lookup view.
+     * The id of the DialogGroup to use when the openInDialog property is true.
      *
-     * <p>Note if the lightbox is not configured, or set to not render the lookup will be invoked based on
-     * the action alone (for example a new tab/window)</p>
+     * <p>The DialogGroup should only contain an iframe for its items.  When not set, a default dialog
+     * will be used.</p>
      *
-     * @return lightbox instance for viewing the lookup
+     * @return the id of the dialog to use for this quickfinder
      */
     @BeanTagAttribute
-    public LightBox getLightBox() {
-        return lightBox;
+    public String getLookupDialogId() {
+        return lookupDialogId;
     }
 
     /**
-     * @see QuickFinder#getLightBox()
+     * @see QuickFinder#getLookupDialogId()
      */
-    public void setLightBox(LightBox lightBox) {
-        this.lightBox = lightBox;
+    public void setLookupDialogId(String lookupDialogId) {
+        this.lookupDialogId = lookupDialogId;
+    }
+
+    /**
+     * True if the quickfinder's lookup should be opened in a dialog; true is the default setting for the
+     * bean.
+     *
+     * @return true if the lookup should be opened in a dialog, false to open in a new window
+     */
+    @BeanTagAttribute
+    public boolean isOpenInDialog() {
+        return openInDialog;
+    }
+
+    /**
+     * @see QuickFinder#isOpenInDialog()
+     */
+    public void setOpenInDialog(boolean openInDialog) {
+        this.openInDialog = openInDialog;
     }
 
     /**

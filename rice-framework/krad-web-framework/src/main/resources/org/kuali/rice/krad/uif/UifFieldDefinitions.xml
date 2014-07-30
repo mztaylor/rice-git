@@ -87,8 +87,6 @@
     </property>
   </bean>
 
-
-
   <bean id="Uif-LookupCriteriaInputField" parent="Uif-LookupCriteriaInputField-parentBean"/>
   <bean id="Uif-LookupCriteriaInputField-parentBean" abstract="true"
         class="org.kuali.rice.krad.lookup.LookupInputField"

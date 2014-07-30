@@ -25,7 +25,6 @@ import org.kuali.rice.krad.uif.service.ViewHelperService;
 import org.kuali.rice.krad.uif.util.ProcessLogger;
 import org.kuali.rice.krad.uif.view.View;
 import org.kuali.rice.krad.uif.view.ViewModel;
-import org.kuali.rice.krad.web.controller.UifControllerHelper;
 import org.kuali.rice.krad.web.form.UifFormBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +33,6 @@ import org.slf4j.LoggerFactory;
  * Perform the lifecycle process for the view or a component.
  *
  * @author Kuali Rice Team (rice.collab@kuali.org)
- * @see ViewLifecycle#encapsulateLifecycle(View, Object, javax.servlet.http.HttpServletRequest,
- * javax.servlet.http.HttpServletResponse, Runnable)
- * @see UifControllerHelper#invokeViewLifecycle(javax.servlet.http.HttpServletRequest,
- * javax.servlet.http.HttpServletResponse, UifFormBase)
  */
 public class ViewLifecycleBuild implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(ViewLifecycleBuild.class);
@@ -125,8 +120,14 @@ public class ViewLifecycleBuild implements Runnable {
      */
     protected void runInitializePhase() {
         ViewLifecycleProcessor processor = ViewLifecycle.getProcessor();
+
+        List<String> refreshPaths = null;
+        if (refreshPathMappings != null) {
+            refreshPaths = refreshPathMappings.get(UifConstants.ViewPhases.INITIALIZE);
+        }
+
         ViewLifecyclePhase phase = KRADServiceLocatorWeb.getViewLifecyclePhaseBuilder().buildPhase(
-                UifConstants.ViewPhases.INITIALIZE);
+                ViewLifecycle.getView(), UifConstants.ViewPhases.INITIALIZE, refreshPaths);
 
         View view = ViewLifecycle.getView();
         ViewHelperService helper = ViewLifecycle.getHelper();
@@ -139,13 +140,6 @@ public class ViewLifecycleBuild implements Runnable {
         }
 
         helper.performCustomViewInitialization(model);
-
-        if (refreshPathMappings != null) {
-            List<String> refreshPaths = refreshPathMappings.get(UifConstants.ViewPhases.INITIALIZE);
-            if (refreshPaths != null) {
-                phase.setRefreshPaths(refreshPaths);
-            }
-        }
 
         processor.performPhase(phase);
 
@@ -160,8 +154,14 @@ public class ViewLifecycleBuild implements Runnable {
      */
     protected void runApplyModelPhase() {
         ViewLifecycleProcessor processor = ViewLifecycle.getProcessor();
+
+        List<String> refreshPaths = null;
+        if (refreshPathMappings != null) {
+            refreshPaths = refreshPathMappings.get(UifConstants.ViewPhases.APPLY_MODEL);
+        }
+
         ViewLifecyclePhase phase = KRADServiceLocatorWeb.getViewLifecyclePhaseBuilder().buildPhase(
-                UifConstants.ViewPhases.APPLY_MODEL);
+                ViewLifecycle.getView(), UifConstants.ViewPhases.APPLY_MODEL, refreshPaths);
 
         View view = ViewLifecycle.getView();
         ViewHelperService helper = ViewLifecycle.getHelper();
@@ -186,13 +186,6 @@ public class ViewLifecycleBuild implements Runnable {
         // set view context for conditional expressions
         helper.setViewContext();
 
-        if (refreshPathMappings != null) {
-            List<String> refreshPaths = refreshPathMappings.get(UifConstants.ViewPhases.APPLY_MODEL);
-            if (refreshPaths != null) {
-                phase.setRefreshPaths(refreshPaths);
-            }
-        }
-
         processor.performPhase(phase);
 
         ProcessLogger.trace("apply-model:" + view.getId());
@@ -205,19 +198,18 @@ public class ViewLifecycleBuild implements Runnable {
      */
     protected void runFinalizePhase() {
         ViewLifecycleProcessor processor = ViewLifecycle.getProcessor();
+
+        List<String> refreshPaths = null;
+        if (refreshPathMappings != null) {
+            refreshPaths = refreshPathMappings.get(UifConstants.ViewPhases.FINALIZE);
+        }
+
         ViewLifecyclePhase phase = KRADServiceLocatorWeb.getViewLifecyclePhaseBuilder().buildPhase(
-                UifConstants.ViewPhases.FINALIZE);
+                ViewLifecycle.getView(), UifConstants.ViewPhases.FINALIZE, refreshPaths);
 
         View view = ViewLifecycle.getView();
         if (LOG.isInfoEnabled()) {
             LOG.info("performing finalize phase for view: " + view.getId());
-        }
-
-        if (refreshPathMappings != null) {
-            List<String> refreshPaths = refreshPathMappings.get(UifConstants.ViewPhases.FINALIZE);
-            if (refreshPaths != null) {
-                phase.setRefreshPaths(refreshPaths);
-            }
         }
 
         processor.performPhase(phase);

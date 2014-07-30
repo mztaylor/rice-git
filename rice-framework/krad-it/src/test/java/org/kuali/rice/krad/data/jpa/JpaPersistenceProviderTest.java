@@ -1,27 +1,11 @@
 package org.kuali.rice.krad.data.jpa;
 
-import org.apache.commons.lang.RandomStringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.kuali.rice.core.api.criteria.Predicate;
-import org.kuali.rice.core.api.criteria.PredicateFactory;
-import org.kuali.rice.core.api.criteria.QueryByCriteria;
-import org.kuali.rice.core.api.criteria.QueryResults;
-import org.kuali.rice.krad.data.CompoundKey;
-import org.kuali.rice.krad.data.DataObjectWrapper;
-import org.kuali.rice.krad.data.KradDataServiceLocator;
-import org.kuali.rice.krad.data.platform.MaxValueIncrementerFactory;
-import org.kuali.rice.krad.data.provider.PersistenceProvider;
-import org.kuali.rice.krad.test.KRADTestCase;
-import org.kuali.rice.krad.test.document.bo.AccountType;
-import org.kuali.rice.krad.test.document.bo.SimpleAccount;
-import org.kuali.rice.krad.test.document.bo.SimpleAccountExtension;
-import org.kuali.rice.test.BaselineTestCase;
-import org.kuali.rice.test.TestHarnessServiceLocator;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.transaction.UnexpectedRollbackException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import javax.sql.DataSource;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +13,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.junit.Assert.*;
+import javax.sql.DataSource;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.log4j.Logger;
+import org.junit.Before;
+import org.junit.Test;
+import org.kuali.rice.core.api.criteria.OrderByField;
+import org.kuali.rice.core.api.criteria.OrderDirection;
+import org.kuali.rice.core.api.criteria.Predicate;
+import org.kuali.rice.core.api.criteria.PredicateFactory;
+import org.kuali.rice.core.api.criteria.QueryByCriteria;
+import org.kuali.rice.core.api.criteria.QueryResults;
+import org.kuali.rice.krad.data.CompoundKey;
+import org.kuali.rice.krad.data.DataObjectWrapper;
+import org.kuali.rice.krad.data.KradDataServiceLocator;
+import org.kuali.rice.krad.data.PersistenceOption;
+import org.kuali.rice.krad.data.platform.MaxValueIncrementerFactory;
+import org.kuali.rice.krad.data.provider.PersistenceProvider;
+import org.kuali.rice.krad.test.KRADTestCase;
+import org.kuali.rice.krad.test.document.bo.Account;
+import org.kuali.rice.krad.test.document.bo.AccountExtension;
+import org.kuali.rice.krad.test.document.bo.AccountType;
+import org.kuali.rice.krad.test.document.bo.SimpleAccount;
+import org.kuali.rice.krad.test.document.bo.SimpleAccountExtension;
+import org.kuali.rice.krad.uif.UifConstants;
+import org.kuali.rice.test.BaselineTestCase;
+import org.kuali.rice.test.TestHarnessServiceLocator;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 /**
  * Tests JPAPersistenceProvider
@@ -140,6 +153,43 @@ public class JpaPersistenceProviderTest extends KRADTestCase {
         assertTestObjectIdentityEquals(saved, found);
     }
 
+    @Test
+    public void testExistsSubQueryCriteria() {
+
+        Logger.getLogger(getClass()).info( "Adding Account" );
+        Account acct = new Account();
+        acct.setNumber("a1");
+        acct.setName("a1 name");
+        provider.save(acct, PersistenceOption.FLUSH);
+
+        Logger.getLogger(getClass()).info( "Testing Account Saved" );
+        acct = provider.find(Account.class, "a1");
+        assertNotNull( "a1 SimpleAccount missing", acct );
+        /*
+         * Testing query of form:
+         *
+         * SELECT * FROM SimpleAccount WHERE EXISTS ( SELECT 'x' FROM SimpleAccountExtension WHERE SimpleAccountExtension.number = SimpleAccount.number )
+         */
+        Predicate subquery = PredicateFactory.existsSubquery(AccountExtension.class.getName(), PredicateFactory.equalsProperty("number", null, "parent.number"));
+        QueryByCriteria q = QueryByCriteria.Builder.fromPredicates(subquery);
+        Logger.getLogger(getClass()).info( "Performing Lookup with Exists Query: " + q );
+        QueryResults<Account> results = provider.findMatching(Account.class, q);
+
+        assertNotNull( "Results should not have been null", results );
+        assertEquals( "Should have been no results in the default data", 0, results.getResults().size() );
+
+        Logger.getLogger(getClass()).info( "Building extension object for retest" );
+        AccountExtension ext = new AccountExtension();
+        ext.setAccount(acct);
+        ext.setAccountTypeCode("EAX");
+        provider.save(ext, PersistenceOption.FLUSH);
+
+        Logger.getLogger(getClass()).info( "Running query again to test results" );
+        results = provider.findMatching(Account.class, q);
+        assertNotNull( "Results should not have been null", results );
+        assertEquals( "We added an extension record, so there should have been one result", 1, results.getResults().size() );
+    }
+
     // EclipseLink consumes the underlying exception itself and explicitly rolls back the transaction
     // resulting in just an opaque UnexpectedRollbackException coming out of Spring
     // (underlying exception is never translated by the PersistenceExceptionTranslator)
@@ -237,24 +287,88 @@ public class JpaPersistenceProviderTest extends KRADTestCase {
     }
 
     @Test
-    public void testFindWithResultsWindow() {
+    public void testFindMatchingOrderBy() {
+        // create our sample data
         Map.Entry<List<Object>, QueryByCriteria.Builder> fixture = createForQuery(10);
         List<Object> objects = fixture.getKey();
         for (Object a: objects) {
             provider.save(a);
         }
 
+        // get the query for our created sample data
         QueryByCriteria.Builder query = fixture.getValue();
+        // specify the order
+        OrderByField.Builder nameOrderBy = OrderByField.Builder.create();
+        OrderByField.Builder amIdOrderBy = OrderByField.Builder.create();
+
+        nameOrderBy.setFieldName("number");
+        nameOrderBy.setOrderDirection(OrderDirection.ASCENDING);
+
+        amIdOrderBy.setFieldName("amId");
+        amIdOrderBy.setOrderDirection(OrderDirection.ASCENDING);
+
+        query.setOrderByFields(nameOrderBy.build(), amIdOrderBy.build());
+
+        // get all created objects, ordered by number column ascending order
+        List<SimpleAccount> ascOrder = provider.findMatching(SimpleAccount.class, query.build()).getResults();
+
+        // get all created objects, ordered by number column descending order
+        nameOrderBy.setOrderDirection(OrderDirection.DESCENDING);
+        amIdOrderBy.setOrderDirection(OrderDirection.DESCENDING);
+        query.setOrderByFields(nameOrderBy.build(), amIdOrderBy.build());
+        List<SimpleAccount> descOrder = provider.findMatching(SimpleAccount.class, query.build()).getResults();
+
+        assertEquals(ascOrder.size(), descOrder.size());
+
+        // ensure the two lists are exact opposites
+        if (!CollectionUtils.isEmpty(ascOrder)) {
+            for (int idx = 0; idx<ascOrder.size();idx++) {
+                assertTestObjectIdentityEquals(ascOrder.get(idx), descOrder.get((ascOrder.size() - 1) - idx));
+            }
+        }
+
+    }
+
+    @Test
+    public void testFindWithResultsWindow() {
+        // get all existing Simple Accounts and delete them so we have a fresh start
+        List<SimpleAccount> acctList = provider.findMatching(SimpleAccount.class, QueryByCriteria.Builder.create().build()).getResults();
+        if (CollectionUtils.isEmpty(acctList)) {
+            for (SimpleAccount acct : acctList) {
+                provider.delete(acct);
+            }
+        }
+
+        // now create our sample data
+        Map.Entry<List<Object>, QueryByCriteria.Builder> fixture = createForQuery(10);
+        List<Object> objects = fixture.getKey();
+        for (Object a: objects) {
+            provider.save(a);
+        }
+
+        // get the query for our created sample data
+        QueryByCriteria.Builder query = fixture.getValue();
+
+        // specify the order
+        OrderByField.Builder orderBy = OrderByField.Builder.create();
+        orderBy.setFieldName("number");
+        orderBy.setOrderDirection(OrderDirection.ASCENDING);
+        query.setOrderByFields(orderBy.build());
+
+        // get all created objects, ordered by number column
+        List<SimpleAccount> resultsAll = provider.findMatching(SimpleAccount.class, query.build()).getResults();
+
+        // now create the window, also ordered by number column
         query.setStartAtIndex(2);
         query.setMaxResults(5);
-        QueryResults<Object> results = provider.findMatching((Class<Object>) objects.get(0).getClass(), query.build());
+        List<SimpleAccount> results = provider.findMatching(SimpleAccount.class, query.build()).getResults();
 
-        assertEquals(5, results.getResults().size());
-        assertTestObjectIdentityEquals(objects.get(2), results.getResults().get(0));
-        assertTestObjectIdentityEquals(objects.get(3), results.getResults().get(1));
-        assertTestObjectIdentityEquals(objects.get(4), results.getResults().get(2));
-        assertTestObjectIdentityEquals(objects.get(5), results.getResults().get(3));
-        assertTestObjectIdentityEquals(objects.get(6), results.getResults().get(4));
+        assertEquals(5, results.size());
+        assertTestObjectIdentityEquals(resultsAll.get(2), results.get(0));
+        assertTestObjectIdentityEquals(resultsAll.get(3), results.get(1));
+        assertTestObjectIdentityEquals(resultsAll.get(4), results.get(2));
+        assertTestObjectIdentityEquals(resultsAll.get(5), results.get(3));
+        assertTestObjectIdentityEquals(resultsAll.get(6), results.get(4));
     }
 
     /**
@@ -416,7 +530,7 @@ public class JpaPersistenceProviderTest extends KRADTestCase {
     @Test
     public void testHandles() {
         Object a = createTopLevelObject();
-        assertTrue(provider.handles((Class<Object>)a.getClass()));
+        assertTrue(provider.handles(a.getClass()));
         Class guaranteedNotToBeMappedClass = this.getClass();
         //  assertFalse(provider.handles(guaranteedNotToBeMappedClass));
     }

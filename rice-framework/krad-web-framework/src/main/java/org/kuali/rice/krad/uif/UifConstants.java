@@ -15,7 +15,6 @@
  */
 package org.kuali.rice.krad.uif;
 
-
 /**
  * General constants used within the User Interface Framework.
  *
@@ -109,6 +108,10 @@ public class UifConstants {
 
     public static enum WorkflowAction {
         SAVE, ROUTE, BLANKETAPPROVE, APPROVE, DISAPPROVE, CANCEL, FYI, ACKNOWLEDGE, COMPLETE, SENDADHOCREQUESTS, RECALL
+    }
+
+    public static enum SuperUserWorkflowAction {
+        TAKEACTION, APPROVE, DISAPPROVE
     }
 
     /**
@@ -223,6 +226,12 @@ public class UifConstants {
         public static final String QUICK_FINDER = "_quickfinder";
         public static final String SPAN = "_span";
         public static final String TAB = "_tab";
+        public static final String HEADER_WRAPPER = "_headerWrapper";
+        public static final String HEADER_UPPER_GROUP = "_headerUpperGroup";
+        public static final String HEADER_RIGHT_GROUP = "_headerRightGroup";
+        public static final String HEADER_LOWER_GROUP = "_headerLowerGroup";
+        public static final String HELP_WRAPPER = "_helpWrapper";
+        public static final String HELP = "_help";
     }
 
     public static class ViewPhases {
@@ -241,7 +250,7 @@ public class UifConstants {
         public static final String FINAL = "F";
         public static final String RENDERED = "R";
     }
-    
+
     public static class PostMetadata {
         public static final String INPUT_FIELD_ATTRIBUTE_QUERY = "attributeQuery";
         public static final String INPUT_FIELD_SUGGEST = "suggest";
@@ -275,7 +284,7 @@ public class UifConstants {
         public static final String QUICKFINDER_CALLBACK_METHOD_TO_CALL = "quickfinderCallbackMethodToCall";
         public static final String QUICKFINDER_CALLBACK_METHOD = "quickfinderCallbackMethod";
         public static final String QUICKFINDER_CALLBACK_CONTEXT = "quickfinderCallbackContext";
-	public static final String QUICKFINDER_CALLBACK_CONTEXT_PROPERTY_LINE_INDEX = "lineIndex";
+        public static final String QUICKFINDER_CALLBACK_CONTEXT_PROPERTY_LINE_INDEX = "lineIndex";
         public static final String FILTERABLE_LOOKUP_CRITERIA = "filterableLookupCriteria";
     }
 
@@ -506,6 +515,7 @@ public class UifConstants {
         public static final String DIALOG_RESPONSE_HANDLER = "response_handler";
         public static final String DIALOG_SHOW_HANDLER = "show_handler";
         public static final String DIALOG_HIDE_HANDLER = "hide_handler";
+        public static final String INLINE_EDIT = "inline_edit";
     }
 
     public static final String JS_REGEX_SPECIAL_CHARS = new String("$[\\^.|?*+()");
@@ -528,10 +538,11 @@ public class UifConstants {
         public static final String FOCUS_ID = "focusId";
         public static final String JUMP_TO_ID = "jumpToId";
         public static final String JUMP_TO_NAME = "jumpToName";
+        public static final String FIELDS_TO_SEND = "fieldsToSend";
     }
 
     public static final class AriaAttributes {
-        public static final String VALUE_NOW= "valuenow";
+        public static final String VALUE_NOW = "valuenow";
         public static final String VALUE_MAX = "valuemax";
         public static final String VALUE_MIN = "valuemin";
         public static final String VALUE_TEXT = "valuetext";
@@ -558,7 +569,7 @@ public class UifConstants {
 
     public static final class JsFunctions {
         public static final String COLLECTION_LINE_CHANGED = "collectionLineChanged";
-        public static final String CREATE_LIGHTBOX_POST = "createLightBoxPost";
+        public static final String SHOW_LOOKUP_DIALOG = "showLookupDialog";
         public static final String HANDLE_SERVER_DIALOG_RESPONSE = "handleServerDialogResponse";
         public static final String INITIALIZE_VIEW_STATE = "initializeViewState";
         public static final String INITIALIZE_SESSION_TIMERS = "initializeSessionTimers";
@@ -573,7 +584,7 @@ public class UifConstants {
     }
 
     public static final String EVENT_NAMESPACE = "uif";
-    
+
     public static final String BOX_LAYOUT_HORIZONTAL_ITEM_CSS = "uif-boxLayoutHorizontalItem";
     public static final String BOX_LAYOUT_VERTICAL_ITEM_CSS = "uif-boxLayoutVerticalItem";
 

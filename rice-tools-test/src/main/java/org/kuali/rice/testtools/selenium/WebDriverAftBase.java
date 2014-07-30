@@ -235,7 +235,8 @@ public abstract class WebDriverAftBase extends JiraAwareAftBase {
         }
     }
 
-    protected void assertFocusTypeBlurValid(String field, String textToType) throws InterruptedException {
+    protected void assertFocusTypeBlurValid(final String field, String textToType) throws InterruptedException {
+        clearTextByName(field);
         fireEvent(field, "focus");
         waitAndTypeByName(field, textToType);
         fireEvent(field, "blur");
@@ -492,6 +493,32 @@ public abstract class WebDriverAftBase extends JiraAwareAftBase {
     protected void determineJgrowlHeader() {
         jGrowlHeader = getClass().getSimpleName() + "." + testMethodName;
         System.out.println(jGrowlHeader + " sessionId is " + sessionId);
+    }
+
+    protected String determinePage() {
+        String url = driver.getCurrentUrl();
+
+        String viewId = "";
+        if (url.contains("viewId=")) {
+            viewId = url.substring(url.indexOf("viewId=") + 7, url.length());
+            if (viewId.indexOf("&") > -1) {
+                viewId = viewId.substring(0, viewId.indexOf("&"));
+            } else {
+                viewId = viewId.substring(0, viewId.length());
+            }
+        }
+
+        String pageId = "";
+        if (url.contains("pageId=")) {
+            pageId = url.substring(url.indexOf("pageId=") + 7, url.length());
+            if (pageId.indexOf("&") > -1) {
+                pageId = "-" + pageId.substring(0, pageId.indexOf("&"));
+            } else {
+                pageId = "-" + pageId.substring(0, pageId.length());
+            }
+        }
+
+        return viewId + pageId;
     }
 
     protected void determineTestMethodName() {
@@ -762,17 +789,24 @@ public abstract class WebDriverAftBase extends JiraAwareAftBase {
             System.out.println("Unable to find " + iframeId);
         }
     }
-    protected void gotoIframeByXpath(final String iframeXpath) {
+    protected WebElement gotoIframeByXpath(final String iframeXpath) {
         if (driver.findElements(By.xpath(iframeXpath)).size() > 0) {  // find elements so an exception isn't thrown if not found
             WebElement contentFrame = driver.findElement(By.xpath(iframeXpath)); // don't highlight
             driver.switchTo().frame(contentFrame);
+            return contentFrame;
         } else {
             System.out.println("Unable to find " + iframeXpath);
         }
+        return null;
     }
 
     protected void gotoLightBox() {
-        driver.switchTo().frame(driver.findElement(By.cssSelector(".fancybox-iframe")));
+        driver.switchTo().frame(driver.findElement(By.cssSelector(".uif-lookupDialog-iframe")));
+    }
+
+    protected WebElement gotoLightBoxIframe() {
+        selectTopFrame();
+        return gotoIframeByXpath("//iframe[@class='uif-iFrame uif-lookupDialog-iframe']");
     }
 
     protected int howManyAreVisible(By by) throws InterruptedException {
@@ -970,7 +1004,7 @@ public abstract class WebDriverAftBase extends JiraAwareAftBase {
     }
 
     protected void screenshot() throws IOException {
-        webDriverScreenshotHelper.screenshot(driver, this.getClass().getSimpleName(), testName.getMethodName());
+        webDriverScreenshotHelper.screenshot(driver, this.getClass().getSimpleName(), testName.getMethodName(), determinePage());
     }
 
     protected void startSession(Method method) throws Exception {
@@ -1047,14 +1081,19 @@ public abstract class WebDriverAftBase extends JiraAwareAftBase {
     @After
     public void tearDown() {
         try {
+
+            if (!isPassed()) {
+                System.out.println("Last AFT URL: " + driver.getCurrentUrl());
+            }
+
+            if ((!isPassed() && webDriverScreenshotHelper.screenshotOnFailure()) || webDriverScreenshotHelper.screenshotSteps()) {
+                screenshot();
+            }
+
             if (isPassed() && WebDriverUtils.dontTearDownPropertyNotSet() && WebDriverUtils.dontTearDownOnFailure(isPassed())) {
                 logout();
-            } else {
-                System.out.println("Last AFT URL: " + driver.getCurrentUrl());
-                if (webDriverScreenshotHelper.screenshotOnFailure() || webDriverScreenshotHelper.screenshotSteps()) {
-                    screenshot();
-                }
             }
+
             WebDriverUtils.tearDown(isPassed(), sessionId, this.toString().trim(), user, getClass().getSimpleName(), testName.getMethodName());
         } catch (Throwable t) {
             System.out.println("Exception in tearDown " + t.getMessage());
@@ -1169,9 +1208,14 @@ public abstract class WebDriverAftBase extends JiraAwareAftBase {
         jGrowl("Click link " + linkText + " labeled with " + label);
         waitAndClick(By.xpath("//th/label[contains(text(), '"
                 + label
-                + "')]/../following-sibling::*/div/a[contains(text(), '"
+                + "')]/../following-sibling::*/div/span/a[contains(text(), '"
                 + linkText
                 + "')]"));
+    }
+
+    protected void waitAndClickLightBoxClose() throws InterruptedException {
+        jGrowl("Click lightbox close");
+        waitAndClickByXpath("//button[contains(text(),'x')]");
     }
 
     protected void waitAndClickLinkContainingText(String linkText) throws InterruptedException {
@@ -1309,6 +1353,12 @@ public abstract class WebDriverAftBase extends JiraAwareAftBase {
         return elements;
     }
 
+    protected String waitAndGetLabeledText(String label) throws InterruptedException {
+        return waitForElementPresent(By.xpath("//th/label[contains(text(), '"
+                + label
+                + "')]/../following-sibling::*/div/span")).getText();
+    }
+
     protected String[] waitAndGetText(By by) throws InterruptedException {
         WebDriverUtils.waitFors(driver, WebDriverUtils.configuredImplicityWait(), by, this.getClass().toString());
         List<WebElement> found = findElements(by);
@@ -1379,6 +1429,7 @@ public abstract class WebDriverAftBase extends JiraAwareAftBase {
      */
     protected void waitForPageToLoad() throws InterruptedException {
         Thread.sleep(5000);
+        checkForIncidentReport();
     }
 
     protected WebElement waitFor(By by) throws InterruptedException {
@@ -1504,8 +1555,11 @@ public abstract class WebDriverAftBase extends JiraAwareAftBase {
     }
 
     protected void waitForElementNotPresent(By by) throws InterruptedException {
+        waitForElementNotPresent(by, WebDriverUtils.configuredImplicityWait());
+    }
+
+    protected void waitForElementNotPresent(By by, int secondsToWait) throws InterruptedException {
         driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
-        int secondsToWait = WebDriverUtils.configuredImplicityWait();
         while (isElementPresent(by) && secondsToWait > 0) {
             secondsToWait -= 1;
             Thread.sleep(1000);
@@ -1529,6 +1583,28 @@ public abstract class WebDriverAftBase extends JiraAwareAftBase {
         }
         driver.manage().timeouts().implicitlyWait(waitSeconds, TimeUnit.SECONDS);
         return present;
+    }
+
+    protected void waitForProgress(String altText) throws InterruptedException {
+        driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+        for (int second = 0;; second++) {
+            Thread.sleep(1000);
+            if (second >= waitSeconds) {
+                jiraAwareFail(TIMEOUT_MESSAGE + " still Loading after " + waitSeconds);
+            }
+            if (!isVisible(By.xpath("//img[@alt='" + altText + "']"))) {
+                break;
+            }
+        }
+        driver.manage().timeouts().implicitlyWait(waitSeconds, TimeUnit.SECONDS);
+    }
+
+    protected void waitForProgressAddingLine() throws InterruptedException {
+        waitForProgress("Adding Line...");
+    }
+
+    protected void waitForProgressLoading() throws InterruptedException {
+        waitForProgress("Loading...");
     }
 
     protected void waitForTextPresent(String text) throws InterruptedException {

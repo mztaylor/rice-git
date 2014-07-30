@@ -44,8 +44,8 @@ public final class KRADConstants {
     public static final String KRAD_INQUIRY_URL_KEY = "krad.inquiry.url";
     public static final String KRAD_LOOKUP_URL_KEY = "krad.lookup.url";
     public static final String KRAD_SERVER_LOOKUP_URL_KEY = "rice.server.krad.lookup.url";
-    public static final String KRAD_INITIATED_DOCUMENT_URL_KEY="initiated.document.url";
-    public static final String KRAD_INITIATED_DOCUMENT_VIEW_NAME="InitiatedDocumentView";
+    public static final String KRAD_INITIATED_DOCUMENT_URL_KEY = "initiated.document.url";
+    public static final String KRAD_INITIATED_DOCUMENT_VIEW_NAME = "InitiatedDocumentView";
 
     public static final String KRAD_DICTIONARY_INDEX_POOL_SIZE = "krad.dictionary.indexPoolSize";
 
@@ -82,6 +82,9 @@ public final class KRADConstants {
     public static final String KUALI_ACTION_CAN_SEND_NOTE_FYI = "canSendNoteFyi";
     public static final String KUALI_ACTION_CAN_EDIT_DOCUMENT_OVERVIEW = "canEditDocumentOverview";
     public static final String KUALI_ACTION_CAN_EXPORT = "canExport";
+    public static final String KUALI_ACTION_CAN_SUPER_USER_TAKE_ACTION = "canSuperUserTakeAction";
+    public static final String KUALI_ACTION_CAN_SUPER_USER_APPROVE = "canSuperUserApprove";
+    public static final String KUALI_ACTION_CAN_SUPER_USER_DISAPPROVE = "canSuperUserDisapprove";
     public static final String KUALI_DEFAULT_TRUE_VALUE = "true";
     public static final String USE_CACHE_ADMINISTRATION_SCREEN = "Use Cache Adminstration Screen";
     public static final String KUALI_ACTION_CAN_COMPLETE = "canComplete";
@@ -625,9 +628,11 @@ public final class KRADConstants {
         public static final String ILLEGAL_BUSINESS_OBJECTS_FOR_SAVE = "rice.krad.illegalBusinessObjectsForSave";
         public static final String COMPONENT_PUBLISHING_ENABLED = "rice.krad.componentPublishing.enabled";
         public static final String COMPONENT_PUBLISHING_DELAY = "rice.krad.componentPublishing.delay";
-        public static final String IGNORE_MISSIONG_FIELDS_ON_DESERIALIZE = "rice.krad.bos.ignoreMissingFieldsOnDeserialize";
+        public static final String IGNORE_MISSIONG_FIELDS_ON_DESERIALIZE =
+                "rice.krad.bos.ignoreMissingFieldsOnDeserialize";
         public static final String KNS_ENABLED = "rice.krad.kns.enabled";
         public static final String ENABLE_LEGACY_DATA_FRAMEWORK = "rice.krad.enableLegacyDataFramework";
+        public static final String ENABLE_VIEW_AUTOGENERATION = "rice.krad.views.autoGeneration.enabled";
 
         private Config() {
             throw new UnsupportedOperationException("do not call");
@@ -709,7 +714,6 @@ public final class KRADConstants {
         public static final String KRAD_VIEW_LIFECYCLE_MINTHREADS = "rice.krad.lifecycle.asynchronous.minThreads";
         public static final String KRAD_VIEW_LIFECYCLE_MAXTHREADS = "rice.krad.lifecycle.asynchronous.maxThreads";
         public static final String KRAD_VIEW_LIFECYCLE_TIMEOUT = "rice.krad.lifecycle.asynchronous.timeout";
-        public static final String KRAD_USE_CLONE = "rice.krad.copyable.useClone";
         public static final String KRAD_COPY_DELAY = "rice.krad.copyable.delay";
         public static final String KRAD_INCLUDE_LESS = "rice.krad.include.less";
         public static final String SCHEMA_PACKAGES = "rice.krad.schema.packages";

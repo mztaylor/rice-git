@@ -154,7 +154,7 @@ public class KSBDispatcherServlet extends DispatcherServlet {
 	}
 
     @Override
-	protected HandlerExecutionChain getHandler(HttpServletRequest request, boolean cache) throws Exception {
+	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		return this.httpInvokerHandler.getHandler(request);
 	}
 

@@ -162,12 +162,12 @@ function initTabMenu(listId, currentPage) {
         var firstItem = $nav.find("li:first");
         var currentTab = firstItem.find("a");
 
-        if(currentPage){
+        if (currentPage) {
             currentTab = $nav.find("a[name='" + currentPage + "']");
 
         }
 
-        if(currentTab){
+        if (currentTab) {
             currentTab.closest("li").addClass("active");
         }
     });
@@ -186,7 +186,7 @@ function setupSidebarNavMenu(id, openedToggleIconClass, closedToggleIconClass) {
     var viewContent = jQuery("#" + kradVariables.VIEW_CONTENT_WRAPPER);
 
     adjustPageLeftMargin();
-    viewContent.on(kradVariables.EVENTS.ADJUST_PAGE_MARGIN, function(){
+    viewContent.on(kradVariables.EVENTS.ADJUST_PAGE_MARGIN, function () {
         adjustPageLeftMargin();
     });
 
@@ -245,7 +245,7 @@ function setupSidebarNavMenu(id, openedToggleIconClass, closedToggleIconClass) {
             navMenu).removeClass(closedToggleIconClass).addClass(openedToggleIconClass);
 }
 
-function adjustPageLeftMargin(){
+function adjustPageLeftMargin() {
     var page = jQuery("[data-role='Page']");
     var menuWidth = jQuery("#Uif-Navigation >").outerWidth(true);
     page.css("margin-left", menuWidth);
@@ -282,176 +282,17 @@ function setupTextPopout(id, label, summary, constraint, readOnly) {
 }
 
 /**
- * Uses jQuery fancybox to open a lightbox for a link's content. The second
- * argument is a Map of options that are available for the FancyBox. See
- * <link>http://fancybox.net/api</link> for documentation on these options.
- * The third argument should only be true for inquiries and lookups.  When this
- * argument is true additional URL parameters are added for the bread crumbs history.
- *
- * @param linkId -
- *          id for the link that the fancybox should be linked to
- * @param options -
- *          map of option settings (option name/value pairs) for the plugin
- * @parm isAddAppParms -
- *          true if application parameters should be added to the link, false otherwise
- */
-function createLightBoxLink(linkId, options, addAppParms) {
-    jQuery(function () {
-        var renderedInLightBox = isCalledWithinLightbox();
-
-        // first time content is brought up in lightbox we don't want to continue history
-        var flow = 'start';
-        if (renderedInLightBox) {
-            flow = jQuery("input[name='" + kradVariables.FLOW_KEY + "']").val();
-        }
-
-        var link = jQuery("#" + linkId);
-        // Check if this is called within a light box
-        if (!renderedInLightBox) {
-            // If this is not the top frame, then create the lightbox
-            // on the top frame to put overlay over whole window
-            link.click(function (e) {
-                e.preventDefault();
-
-                options['href'] = link.attr('href');
-                getContext().fancybox(options);
-            });
-        } else {
-            link.attr('target', '_self');
-        }
-
-        if (addAppParms) {
-            // Set the renderedInLightBox = true param
-            if (link.attr('href').indexOf('&renderedInLightBox=true') == -1) {
-                var href = link.attr('href');
-
-                link.attr('href', href + '&renderedInLightBox=true&flow=' + flow);
-            }
-        }
-    });
-}
-
-function handleLightboxOpen(link, options, addAppParms, event) {
-    event.preventDefault();
-    var renderedInLightBox = isCalledWithinLightbox();
-
-    // first time content is brought up in lightbox we don't want to continue history
-    var flow = 'start';
-    if (renderedInLightBox) {
-        flow = jQuery("input[name='" + kradVariables.FLOW_KEY + "']").val();
-    }
-
-    if (addAppParms) {
-        // Set the renderedInLightBox = true param
-        if (link.attr('href').indexOf('&renderedInLightBox=true') == -1) {
-            var href = link.attr('href');
-
-            //set lightbox flag and continue flow
-            link.attr('href', href + '&renderedInLightBox=true&flow=' + flow);
-        }
-    }
-
-    // Check if this is called within a light box
-    if (!renderedInLightBox) {
-        // If this is not the top frame, then create the lightbox
-        // on the top frame to put overlay over whole window
-        options['href'] = link.attr('href');
-        getContext().fancybox(options);
-    } else {
-        window.location = link.attr('href');
-    }
-}
-
-/**
- * Submits the form based on the quickfinder action identified by the given id and display the result content in
- * a lightbox using the jQuery fancybox. If we are not currently in a lightbox, we will request a redirect URL
- * for the lightbox contents. Otherwise, the internal iframe of the lightbox will be redirected.
- *
- * <p>
- * See <link>http://fancybox.net/api</link> for documentation on plugin options
- * </p>
- *
- * @param componentId
- *          id for the action component that the fancybox should be linked to
- * @param options
- *          map of option settings (option name/value pairs) for the fancybox plugin
- * @param lookupReturnByScript - boolean that indicates whether the lookup should return through script
- *        or via a server post
- */
-function createLightBoxPost(componentId, options, lookupReturnByScript) {
-    jQuery(function () {
-        var data = {};
-        var submitData = jQuery("#" + componentId).data(kradVariables.SUBMIT_DATA);
-        jQuery.extend(data, submitData);
-
-        // Check if this is not called within a lightbox
-        var renderedInLightBox = isCalledWithinLightbox();
-        if (!renderedInLightBox) {
-            if (top === self) {
-                data['actionParameters[returnTarget]'] = '_parent';
-            } else {
-                data['actionParameters[returnTarget]'] = 'iframeportlet';
-            }
-
-            var baseURI = this.documentURI;
-            if (baseURI.indexOf("?") > -1) {
-                baseURI = baseURI.substring(0, baseURI.indexOf("?"));
-            }
-
-            data['actionParameters[returnLocation]'] = encodeURIComponent(baseURI);
-            data['actionParameters[renderedInLightBox]'] = true;
-            data['actionParameters[returnByScript]'] = lookupReturnByScript;
-            data['actionParameters[methodToCall]'] = "start";
-            data['actionParameters[flowKey]'] = "start";
-            data['actionParameters[returnFormKey]'] = jQuery("#formInfo").children("input[name='formKey']").val();
-
-            var lookupParameters = data['actionParameters[lookupParameters]'];
-            if (lookupParameters !== "" && typeof lookupParameters !== "undefined") {
-                var lookupField = lookupParameters.substring(lookupParameters.indexOf(":") + 1);
-                var lookupValue = jQuery("#" + componentId).parent().parent().children("input").val();
-                if (lookupField !== "" && typeof lookupField !== "undefined" && lookupValue !== "" && typeof lookupValue !== "undefined") {
-                    data['actionParameters[lookupCriteria[&quot;' + lookupField + '&quot;]]'] = lookupValue;
-                }
-            }
-
-            var lookupUrl = data['actionParameters[baseLookupUrl]'] + "?";
-
-            for (var key in data) {
-                if (key.indexOf("actionParameters") !== -1) {
-                    var parameterName = key.replace("actionParameters[", "").replace("]", "").replace(new RegExp("&quot;", 'g'), "'");
-                    lookupUrl += parameterName + "=" + data[key] + "&";
-                }
-            }
-
-            // Trim the remaining ampersand
-            lookupUrl = lookupUrl.substring(0, lookupUrl.length -1);
-
-            options['href'] = lookupUrl.replace(/&amp;/g, '&');
-
-            getContext().fancybox(options);
-        } else {
-            // add parameters for lightbox and do standard submit
-            data['actionParameters[renderedInLightBox]'] = 'true';
-            data['actionParameters[returnTarget]'] = '_self';
-            data['actionParameters[flowKey]'] = jQuery("input[name='" + kradVariables.FLOW_KEY + "']").val();
-
-            nonAjaxSubmitForm(data['methodToCall'], data);
-        }
-    });
-}
-
-/**
  * Check if the code is inside a lightbox
  *
  * @return true if called within a lightbox, false otherwise
  */
-function isCalledWithinLightbox() {
-    var isRenderedInLightbox = jQuery("input[name='" + kradVariables.RENDERED_IN_LIGHTBOX + "']").val();
-    if (isRenderedInLightbox == undefined) {
+function isCalledWithinDialog() {
+    var isRenderedInDialog = jQuery("input[name='" + kradVariables.RENDERED_IN_DIALOG + "']").val();
+    if (isRenderedInDialog == undefined) {
         return false;
     }
 
-    return isRenderedInLightbox.toUpperCase() == 'TRUE' || isRenderedInLightbox.toUpperCase() == 'YES';
+    return isRenderedInDialog.toUpperCase() == 'TRUE' || isRenderedInDialog.toUpperCase() == 'YES';
     // reverting for KULRICE-8346
 //    try {
 //        // For security reasons the browsers will not allow cross server scripts and
@@ -469,21 +310,18 @@ function isCalledWithinLightbox() {
 }
 
 /**
- * Opens the inquiry window
- * Is called from the onclick event on the direct inquiry
- * The parameters is added by dynamically getting the values
- * for the fields in the parameter maps and then added to the url string
+ * Shows the direct inquiry dialog
  *
- * @param url -
- *          the base url to use to call the inquiry
- * @param paramMap -
- *          array of field parameters for the inquiry
- * @param showLightBox -
- *          flag to indicate if it must be shown in a lightbox
- * @param lightBoxOptions -
- *          map of option settings (option name/value pairs) for the lightbox plugin
+ * <p>Function that is called from the onclick event on the direct inquiry.
+ * The parameters is added by dynamically getting the values
+ * for the fields in the parameter maps and then added to the url string.</p>
+ *
+ * @param url the base url to use to call the inquiry
+ * @param paramMap array of field parameters for the inquiry
+ * @param showInDialog flag to indicate if it must be shown in a dialog
+ * @param dialogId(optional) id of dialog to use, if not set Uif-DialogGroup-Iframe will be used
  */
-function showDirectInquiry(url, paramMap, showLightBox, lightBoxOptions) {
+function showDirectInquiry(url, paramMap, showInDialog, dialogId) {
     var parameterPairs = paramMap.split(",");
     var queryString = "";
 
@@ -498,23 +336,20 @@ function showDirectInquiry(url, paramMap, showLightBox, lightBoxOptions) {
         }
     }
 
-    if (showLightBox) {
+    if (showInDialog) {
         // Check if this is called within a light box
         if (!getContext().find('.fancybox-inner', parent.document).length) {
-            // Perform cleanup when lightbox is closed
-            lightBoxOptions['beforeClose'] = cleanupClosedLightboxForms;
 
-            queryString = queryString + "&flow=start&renderedInLightBox=true";
-            lightBoxOptions['href'] = url + queryString;
-            getContext().fancybox(lightBoxOptions);
+            queryString = queryString + "&flow=start&renderedInDialog=true";
+            url = url + queryString;
+            openIframeDialog(url, dialogId);
         } else {
             // If this is already in a lightbox just open in current lightbox
             queryString = queryString + "&flow="
-                    + jQuery("input[name='" + kradVariables.FLOW_KEY + "']").val() + "&renderedInLightBox=true";
+                    + jQuery("input[name='" + kradVariables.FLOW_KEY + "']").val() + "&renderedInDialog=true";
             window.open(url + queryString, "_self");
         }
     } else {
-        queryString = queryString;
         window.open(url + queryString, "_blank", "width=640, height=600, scrollbars=yes");
     }
 }
@@ -724,7 +559,7 @@ function createMultiFileUploadForCollection(id, collectionId, additionalOptions)
         options.url = "?" + getUrlQueryString("methodToCall", "fileUpload");
     }
 
-    if(options.acceptFileTypes) {
+    if (options.acceptFileTypes) {
         options.acceptFileTypes = new RegExp(options.acceptFileTypes);
     }
 
@@ -753,7 +588,7 @@ function createMultiFileUploadForCollection(id, collectionId, additionalOptions)
         });
 
         $fileInput.bind('fileuploadprocessfail', function (e, data) {
-           alert( 'Processing ' + data.files[data.index].name + ' of type ' + data.files[data.index].type + ' failed.\nError: ' + data.files[data.index].error );
+            alert('Processing ' + data.files[data.index].name + ' of type ' + data.files[data.index].type + ' failed.\nError: ' + data.files[data.index].error);
         });
     }
 }
@@ -1006,7 +841,7 @@ function openDetails(oTable, row, actionComponent, animate) {
             kradRequest.methodToCall = kradVariables.REFRESH_METHOD_TO_CALL;
         }
 
-        kradRequest.successCallback = function(){
+        kradRequest.successCallback = function () {
             jQuery("#" + detailsId).show();
         };
 
@@ -1032,7 +867,7 @@ function toggleColumnVisibility(tableId, columnId, bVisibility) {
     var oTable = getDataTableHandle(tableId);
     var columnIndex = jQuery(oTable).find('thead th' + columnId).index();
     var header = jQuery(oTable).find('thead th' + columnId);
-    var columns = jQuery(oTable).find('tr td:nth-child(' + (columnIndex+1) + ')');
+    var columns = jQuery(oTable).find('tr td:nth-child(' + (columnIndex + 1) + ')');
     var footer = jQuery(oTable).find('tfoot th').eq(columnIndex);
     if (bVisibility) {
         header.show();
@@ -1060,7 +895,7 @@ function toggleColumnVisibility(tableId, columnId, bVisibility) {
 function hasVisibleElementsInColumn(tableId, columnId) {
     var oTable = getDataTableHandle(tableId);
     var columnIndex = jQuery(oTable).find('thead th' + columnId).index();
-    var columns = jQuery(oTable).find('tr td:nth-child(' + (columnIndex+1) + ')');
+    var columns = jQuery(oTable).find('tr td:nth-child(' + (columnIndex + 1) + ')');
     var isColumnsEmpty = true;
 
     jQuery.each(columns, function (index, td) {
@@ -1073,8 +908,8 @@ function hasVisibleElementsInColumn(tableId, columnId) {
             columnGroupVisible = false;
         }
 
-        columnContent.filter(function() {
-             return jQuery(this).css("display") != "none";
+        columnContent.filter(function () {
+            return jQuery(this).css("display") != "none";
         });
 
         if (columnContent.size() > 0 && columnGroupVisible) {
@@ -1483,7 +1318,7 @@ function createTooltip(id, text, options, onMouseHoverFlag, onFocusFlag) {
     }
     if (onMouseHoverFlag) {
 
-        tooltipElement.on("mouseover", function(){
+        tooltipElement.on("mouseover", function () {
             if (!isControlWithMessages(id)) {
                 var tooltipElement = jQuery(this);
                 var popoverData = tooltipElement.data(kradVariables.POPOVER_DATA);
@@ -1499,7 +1334,7 @@ function createTooltip(id, text, options, onMouseHoverFlag, onFocusFlag) {
             }
         });
 
-        tooltipElement.on("mouseout", function(){
+        tooltipElement.on("mouseout", function () {
             if (!isControlWithMessages(id) && !(onFocusFlag && jQuery("#" + id).is(":focus"))) {
                 var tooltipElement = jQuery(this);
                 var popoverData = tooltipElement.data(kradVariables.POPOVER_DATA);
@@ -1519,12 +1354,12 @@ function initializeTooltip(tooltipElement, extendedOptions, additionalClasses) {
         classAttr = classAttr + " " + additionalClasses;
     }
     var options = {
-            trigger:"manual",
-            placement: "auto top",
-            html: true,
-            animation: false,
-            template: '<div class="' + classAttr + '"><div class="arrow"></div><div class="popover-content"></div></div>'
-        };
+        trigger: "manual",
+        placement: "auto top",
+        html: true,
+        animation: false,
+        template: '<div class="' + classAttr + '"><div class="arrow"></div><div class="popover-content"></div></div>'
+    };
 
     if (extendedOptions) {
         jQuery.extend(options, extendedOptions);

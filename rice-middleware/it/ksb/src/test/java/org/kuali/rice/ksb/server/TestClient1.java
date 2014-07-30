@@ -16,11 +16,14 @@
 package org.kuali.rice.ksb.server;
 
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.http.ssl.SslContextFactory;
 import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.kuali.rice.core.api.config.property.Config;
 import org.kuali.rice.core.api.config.property.ConfigContext;
@@ -103,10 +106,16 @@ public class TestClient1 extends BaseTestServer {
 		LOG.debug("#");
 		LOG.debug("#####################################");
 
-        WebAppContext context = new WebAppContext(location, configConstants.CONTEXT);
-        context.setThrowUnavailableOnStartupException(true);
-        context.setClassLoader(new KsbTestClientClassLoader());
-        server.setHandler(context);
+        WebAppContext context = new WebAppContext();
+        context.setResourceBase(location);
+        context.setContextPath(configConstants.CONTEXT);
+
+        HandlerCollection handlers = new HandlerCollection();
+        handlers.addHandler(context);
+        server.setHandler(handlers);
+
+        server.setDumpAfterStart(true);
+        //server.setDumpBeforeStop(true);
 
         return server;
     }

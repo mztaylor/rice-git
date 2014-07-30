@@ -166,14 +166,17 @@ public class LookupView extends FormView {
     public void performApplyModel(Object model, LifecycleElement parent) {
         LookupForm lookupForm = (LookupForm) model;
 
-        if (!renderCriteriaActions) {
+        // don't render criteria group footer/actions
+        if (!renderCriteriaActions || hideCriteriaOnSearch) {
             criteriaGroup.getFooter().setRender(false);
         }
 
+        // don't render criteria if not supposed to or (hide on search results and displaying the results)
         if (!renderLookupCriteria || (hideCriteriaOnSearch && lookupForm.isDisplayResults())) {
             criteriaGroup.setRender(false);
         }
 
+        // if hide on search results and not displaying search results don't render results
         if (hideCriteriaOnSearch && !lookupForm.isDisplayResults()) {
             resultsGroup.setRender(false);
         }
@@ -861,21 +864,4 @@ public class LookupView extends FormView {
         this.additionalSecurePropertyNames = additionalSecurePropertyNames;
     }
 
-    /**
-     * Clones the {@code LookupView} with a deep copy.
-     *
-     * @return a clone of the current {@code LookupView}
-     *
-     * @see org.kuali.rice.krad.uif.component.ComponentBase#clone()
-     */
-    @Override
-    public LookupView clone() throws CloneNotSupportedException {
-        LookupView lookupViewCopy = (LookupView) super.clone();
-
-        if (getViewHelperService() != null) {
-            lookupViewCopy.setViewHelperService(((LookupableImpl) getViewHelperService()).copy());
-        }
-
-        return lookupViewCopy;
-    }
 }

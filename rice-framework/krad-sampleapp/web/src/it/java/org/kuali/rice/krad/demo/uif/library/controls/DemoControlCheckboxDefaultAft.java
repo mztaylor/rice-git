@@ -92,11 +92,11 @@ public class DemoControlCheckboxDefaultAft extends DemoLibraryBase {
         assertTrue(isEnabledById("ST-DemoCheckboxControlExample2-Input1_control_2"));
         assertTrue(isEnabledById("ST-DemoCheckboxControlExample2-Input1_control_3"));
         assertTrue(isEnabledById("ST-DemoCheckboxControlExample2-Input1_control_4"));
-        assertFalse(isCheckedById("ST-DemoCheckboxControlExample2-Input1_control_0"));
-        assertFalse(isCheckedById("ST-DemoCheckboxControlExample2-Input1_control_1"));
-        assertFalse(isCheckedById("ST-DemoCheckboxControlExample2-Input1_control_2"));
-        assertFalse(isCheckedById("ST-DemoCheckboxControlExample2-Input1_control_3"));
-        assertFalse(isCheckedById("ST-DemoCheckboxControlExample2-Input1_control_4"));
+        assertFalse("Checkbox ST-DemoCheckboxControlExample2-Input1_control_0 is checked", isCheckedById("ST-DemoCheckboxControlExample2-Input1_control_0"));
+        assertFalse("Checkbox ST-DemoCheckboxControlExample2-Input1_control_1 is checked", isCheckedById("ST-DemoCheckboxControlExample2-Input1_control_1"));
+        assertFalse("Checkbox ST-DemoCheckboxControlExample2-Input1_control_2 is checked", isCheckedById("ST-DemoCheckboxControlExample2-Input1_control_2"));
+        assertFalse("Checkbox ST-DemoCheckboxControlExample2-Input1_control_3 is checked", isCheckedById("ST-DemoCheckboxControlExample2-Input1_control_3"));
+        assertFalse("Checkbox ST-DemoCheckboxControlExample2-Input1_control_4 is checked", isCheckedById("ST-DemoCheckboxControlExample2-Input1_control_4"));
 
         // set check mark on second checkbox control
        checkById("ST-DemoCheckboxControlExample2-Input1_control_1");
@@ -156,7 +156,7 @@ public class DemoControlCheckboxDefaultAft extends DemoLibraryBase {
 
     @Test
     public void testCheckboxControlKeyValuePairBookmark() throws Exception {
-        testCheckboxControlOptionsFinder();
+        testCheckboxControlKeyValuePair();
         passed();
     }
 
@@ -208,19 +208,19 @@ public class DemoControlCheckboxDefaultAft extends DemoLibraryBase {
         assertTrue(we.getAttribute("class").matches(".*\\buif-horizontalCheckboxesFieldset\\b.*"));
 
         // check that checkbox controls are enabled and visible but not selected
-        assertTrue(isVisibleById("ST-DemoCheckboxControlExample6-Input1_control_0"));
-        assertTrue(isVisibleById("ST-DemoCheckboxControlExample6-Input1_control_1"));
-        assertTrue(isEnabledById("ST-DemoCheckboxControlExample6-Input1_control_0"));
-        assertTrue(isEnabledById("ST-DemoCheckboxControlExample6-Input1_control_1"));
-        assertFalse(isCheckedById("ST-DemoCheckboxControlExample6-Input1_control_0"));
-        assertFalse(isCheckedById("ST-DemoCheckboxControlExample6-Input1_control_1"));
+        assertTrue("Checkbox 1 not visible", isVisibleById("ST-DemoCheckboxControlExample6-Input1_control_0"));
+        assertTrue("Checkbox 2 not visible", isVisibleById("ST-DemoCheckboxControlExample6-Input1_control_1"));
+        assertTrue("Checkbox 1 not enabled", isEnabledById("ST-DemoCheckboxControlExample6-Input1_control_0"));
+        assertTrue("Checkbox 2 not enabled", isEnabledById("ST-DemoCheckboxControlExample6-Input1_control_1"));
+        assertFalse("Checkbox 1 is checked", isCheckedById("ST-DemoCheckboxControlExample6-Input1_control_0"));
+        assertFalse("Checkbox 2 is checked", isCheckedById("ST-DemoCheckboxControlExample6-Input1_control_1"));
 
         // set check mark on second checkbox control
         checkById("ST-DemoCheckboxControlExample6-Input1_control_1");
 
         // check that only second checkbox controls is selected
-        assertFalse(isCheckedById("ST-DemoCheckboxControlExample6-Input1_control_0"));
-        assertTrue(isCheckedById("ST-DemoCheckboxControlExample6-Input1_control_1"));
+        assertFalse("Checkbox 1 is checked", isCheckedById("ST-DemoCheckboxControlExample6-Input1_control_0"));
+        assertTrue("Checkbox 2 not checked", isCheckedById("ST-DemoCheckboxControlExample6-Input1_control_1"));
     }
 
     @Test

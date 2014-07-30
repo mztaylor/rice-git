@@ -194,11 +194,19 @@ public class UifViewBeanWrapper extends BeanWrapperImpl {
     public Object getPropertyValue(String propertyName) throws BeansException {
         registerEditorFromView(propertyName);
 
+        // set auto grow to false here because we don't want empty object created when only
+        // displaying data
+        setAutoGrowNestedPaths(false);
+
         Object value = null;
         try {
             value = super.getPropertyValue(propertyName);
         } catch (NullValueInNestedPathException e) {
             // swallow null values in path and return null as the value
+        } catch (InvalidPropertyException e1) {
+            if (!(e1.getRootCause() instanceof NullValueInNestedPathException)) {
+                throw e1;
+            }
         }
 
         return value;
@@ -220,6 +228,10 @@ public class UifViewBeanWrapper extends BeanWrapperImpl {
         if (!isPropertyAccessible) {
             return;
         }
+
+        // since auto grows is explicity turned off for get, we need to turn it on for set (so our objects
+        // will grow if necessary for user entered data)
+        setAutoGrowNestedPaths(true);
 
         Object value = processValueBeforeSet(pv.getName(), pv.getValue());
 
@@ -271,6 +283,8 @@ public class UifViewBeanWrapper extends BeanWrapperImpl {
         if (!isPropertyAccessible) {
             return;
         }
+
+        setAutoGrowNestedPaths(true);
 
         value = processValueBeforeSet(propertyName, value);
 
@@ -396,11 +410,6 @@ public class UifViewBeanWrapper extends BeanWrapperImpl {
             propertyPath = parentPropertyPath;
         }
 
-        // if its a GET request and there was no annotation found, then we still want to disallow
-        if(request.getMethod().equalsIgnoreCase(RequestMethod.GET.name())) {
-            return Boolean.FALSE;
-        }
-
         return null;
     }
 
@@ -522,10 +531,10 @@ public class UifViewBeanWrapper extends BeanWrapperImpl {
         BeanWrapperImpl beanWrapper;
         try {
             beanWrapper = getBeanWrapperForPropertyPath(propertyPath);
-        } catch (NotReadablePropertyException nrpe) {
+        } catch (NotReadablePropertyException | NullValueInNestedPathException e) {
             LOG.debug("Bean wrapper was not found for "
                     + propertyPath
-                    + ", but since it cannot be accessed it will not be set as secure.", nrpe);
+                    + ", but since it cannot be accessed it will not be set as secure.", e);
             return false;
         }
 

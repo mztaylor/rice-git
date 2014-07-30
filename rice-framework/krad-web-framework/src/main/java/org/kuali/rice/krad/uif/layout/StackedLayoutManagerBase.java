@@ -32,6 +32,7 @@ import org.kuali.rice.krad.uif.component.DataBinding;
 import org.kuali.rice.krad.uif.component.KeepExpression;
 import org.kuali.rice.krad.uif.container.CollectionGroup;
 import org.kuali.rice.krad.uif.container.Container;
+import org.kuali.rice.krad.uif.container.DialogGroup;
 import org.kuali.rice.krad.uif.container.Group;
 import org.kuali.rice.krad.uif.container.collections.LineBuilderContext;
 import org.kuali.rice.krad.uif.element.Action;
@@ -248,7 +249,11 @@ public class StackedLayoutManagerBase extends CollectionLayoutManagerBase implem
                     ((ViewModel) lineBuilderContext.getModel()).getClientStateForSyncing());
         }
 
-        stackedGroups.add(lineGroup);
+        // don't add to stackedGroups else will get double set of dialog boxes
+        // see FreeMarkerInlineRenderUtils.renderCollectionGroup near end where renders add line dialog
+        if (lineGroup instanceof DialogGroup == false) {
+            stackedGroups.add(lineGroup);
+        }
     }
 
     /**
@@ -355,6 +360,23 @@ public class StackedLayoutManagerBase extends CollectionLayoutManagerBase implem
 
         CollectionPagingHelper pagingHelper = new CollectionPagingHelper();
         pagingHelper.processPagingRequest(ViewLifecycle.getView(), collectionGroup, (UifFormBase) model, pageNumber);
+    }
+
+    /**
+     * Returns the parent {@link org.kuali.rice.krad.uif.layout.collections.CollectionLayoutManagerBase}'s add line group
+     *
+     * <p>
+     * This method is overridden to restrict the lifecycle of the add line group as a resolution to avoid duplicate
+     * components from being added to the view, for example, quickfinders.
+     * </p>
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    @BeanTagAttribute
+    @ViewLifecycleRestriction(UifConstants.ViewPhases.INITIALIZE)
+    public Group getAddLineGroup() {
+        return super.getAddLineGroup();
     }
 
     /**

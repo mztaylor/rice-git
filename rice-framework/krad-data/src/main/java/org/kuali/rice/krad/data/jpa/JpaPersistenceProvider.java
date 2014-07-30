@@ -15,7 +15,14 @@
  */
 package org.kuali.rice.krad.data.jpa;
 
-import com.google.common.collect.Sets;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
+import javax.persistence.EntityManager;
+import javax.persistence.NonUniqueResultException;
+import javax.persistence.metamodel.ManagedType;
+
 import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.kuali.rice.core.api.config.property.ConfigContext;
 import org.kuali.rice.core.api.criteria.QueryByCriteria;
@@ -38,12 +45,7 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.metamodel.ManagedType;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
+import com.google.common.collect.Sets;
 
 /**
  * Java Persistence API (JPA) implementation of {@link PersistenceProvider}.
@@ -182,7 +184,15 @@ public class JpaPersistenceProvider implements PersistenceProvider, BeanFactoryA
                 // save has been completed
                 if(optionSet.contains(PersistenceOption.FLUSH) || optionSet.contains(PersistenceOption.LINK_KEYS) ||
                         LazyConfigHolder.autoFlush){
-			        sharedEntityManager.flush();
+					sharedEntityManager.flush();
+					// if (sharedEntityManager.getEntityManagerFactory().getCache() != null) {
+					// Object dataObjectKey = sharedEntityManager.getEntityManagerFactory().getPersistenceUnitUtil()
+					// .getIdentifier(mergedDataObject);
+					// if (dataObjectKey != null) {
+					// sharedEntityManager.getEntityManagerFactory().getCache()
+					// .evict(dataObject.getClass(), dataObjectKey);
+					// }
+					// }
                 }
 
                 return mergedDataObject;
@@ -251,7 +261,16 @@ public class JpaPersistenceProvider implements PersistenceProvider, BeanFactoryA
             @Override
 			public Object call() {
                 verifyDataObjectWritable(dataObject);
-                sharedEntityManager.remove(sharedEntityManager.merge(dataObject));
+				Object mergedDataObject = sharedEntityManager.merge(dataObject);
+				sharedEntityManager.remove(mergedDataObject);
+				// if (sharedEntityManager.getEntityManagerFactory().getCache() != null) {
+				// Object dataObjectKey = sharedEntityManager.getEntityManagerFactory().getPersistenceUnitUtil()
+				// .getIdentifier(mergedDataObject);
+				// if (dataObjectKey != null) {
+				// sharedEntityManager.getEntityManagerFactory().getCache()
+				// .evict(dataObject.getClass(), dataObjectKey);
+				// }
+				// }
                 return null;
             }
         });
@@ -266,6 +285,11 @@ public class JpaPersistenceProvider implements PersistenceProvider, BeanFactoryA
             @Override
             public Object call() {
                 new JpaCriteriaQuery(getSharedEntityManager()).deleteMatching(type, queryByCriteria);
+				// If the L2 cache is enabled, items will still be served from the cache
+				// So, we need to flush that as well for the given type
+				if (sharedEntityManager.getEntityManagerFactory().getCache() != null) {
+					sharedEntityManager.getEntityManagerFactory().getCache().evict(type);
+				}
                 return null;
             }
         });
@@ -280,6 +304,11 @@ public class JpaPersistenceProvider implements PersistenceProvider, BeanFactoryA
             @Override
             public Object call() {
                 new JpaCriteriaQuery(getSharedEntityManager()).deleteAll(type);
+				// If the L2 cache is enabled, items will still be served from the cache
+				// So, we need to flush that as well for the given type
+				if (sharedEntityManager.getEntityManagerFactory().getCache() != null) {
+					sharedEntityManager.getEntityManagerFactory().getCache().evict(type);
+				}
                 return null;
             }
         });
@@ -330,6 +359,11 @@ public class JpaPersistenceProvider implements PersistenceProvider, BeanFactoryA
             @Override
 			public Object call() {
                 sharedEntityManager.flush();
+				// If the L2 cache is enabled, items will still be served from the cache
+				// So, we need to flush that as well for the given type
+				if (sharedEntityManager.getEntityManagerFactory().getCache() != null) {
+					sharedEntityManager.getEntityManagerFactory().getCache().evict(type);
+				}
                 return null;
             }
         });

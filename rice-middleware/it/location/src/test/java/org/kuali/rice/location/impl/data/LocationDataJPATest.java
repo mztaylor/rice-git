@@ -16,16 +16,17 @@
 
 package org.kuali.rice.location.impl.data;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
+import org.junit.Assert;
 import org.junit.Test;
-import org.kuali.rice.core.api.CoreApiServiceLocator;
 import org.kuali.rice.core.api.criteria.QueryByCriteria;
-import org.kuali.rice.coreservice.api.CoreServiceApiServiceLocator;
-import org.kuali.rice.coreservice.impl.parameter.ParameterBo;
-import org.kuali.rice.kns.service.KNSServiceLocator;
 import org.kuali.rice.krad.service.KRADServiceLocator;
-import org.kuali.rice.krad.service.KRADServiceLocatorWeb;
-import org.kuali.rice.krad.test.KRADTestCase;
 import org.kuali.rice.location.api.campus.Campus;
 import org.kuali.rice.location.api.campus.CampusQueryResults;
 import org.kuali.rice.location.api.campus.CampusType;
@@ -50,251 +51,294 @@ import org.kuali.rice.location.impl.state.StateBo;
 import org.kuali.rice.location.impl.state.StateId;
 import org.kuali.rice.test.BaselineTestCase;
 
-import static org.junit.Assert.*;
-
-import javax.persistence.EntityManagerFactory;
-import javax.validation.constraints.AssertTrue;
-import java.util.List;
-import java.util.UUID;
-
 /**
  * Tests to confirm JPA mapping for the Location module data objects
  */
 @BaselineTestCase.BaselineMode(BaselineTestCase.Mode.CLEAR_DB)
-public class LocationDataJPATest extends KRADTestCase {
+public class LocationDataJPATest extends LocationTestCase {
 
-    @Test
-    public void testPostalCodeBoDataObject() throws Exception{
-        assertTrue("PostalCodeBo is mapped in JPA", KRADServiceLocator.getDataObjectService().supports(PostalCodeBo.class));
+    /**
+     * This overridden method ...
+     *
+     * @see org.kuali.rice.krad.test.KRADTestCase#setUp()
+     */
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
         setupPostalCodeBoDataObjectAndSave();
+        setupCampusBoDataObjectAndSave();
 
-        PostalCodeBo postalCodeBo = KRADServiceLocator.getDataObjectService().find(
-                                    PostalCodeBo.class,new PostalCodeId("US","47203"));
-        assertTrue("PostalCode BO fetched after save", postalCodeBo != null && StringUtils.equals(postalCodeBo.getCode(),"47203"));
-        assertTrue("PostalCode BO fetched Country BO correctly",postalCodeBo.getCountry()!=null
-                        && StringUtils.equals(postalCodeBo.getCountry().getAlternateCode(),"USA"));
-        assertTrue("PostalCode BO fetched State BO correctly",postalCodeBo.getState() != null
-                        && StringUtils.equals(postalCodeBo.getState().getCode(),"IN"));
-        assertTrue("PostalCode BO fetched County BO correctly",postalCodeBo.getCounty() != null
-                        && StringUtils.equals(postalCodeBo.getCounty().getCode(),"MON"));
+        // If we don't do this, then some of the objects are created without
+        // their reference object proxies in place.  This forces all the objects which
+        // were created by the above methods to be reloaded as needed during the test.
+        KRADServiceLocator.getDataObjectService().flush(PostalCodeBo.class);
+        KRADServiceLocator.getDataObjectService().flush(CountryBo.class);
+        KRADServiceLocator.getDataObjectService().flush(CountyBo.class);
+        KRADServiceLocator.getDataObjectService().flush(StateBo.class);
+        KRADServiceLocator.getDataObjectService().flush(CampusTypeBo.class);
+        KRADServiceLocator.getDataObjectService().flush(CampusBo.class);
     }
 
     @Test
-    public void testCountyBoDataObject() throws Exception{
-        assertTrue("CountyBO is mapped in JPA", KRADServiceLocator.getDataObjectService().supports(CountryBo.class));
-        setupCountyBoDataObjectAndSave();
-
-        CountyBo countyBo = KRADServiceLocator.getDataObjectService().find(CountyBo.class,new CountyId("MON","US","IN"));
-        assertTrue("County BO fetched after save",countyBo != null && StringUtils.equals(countyBo.getName(),"Monroe"));
-        assertTrue("County Bo fetched State Bo correctly",countyBo.getState() != null
-                                        && StringUtils.equals(countyBo.getState().getName(),"Indiana"));
-        assertTrue("County Bo fetched Country Bo correctly",countyBo.getCountry() != null
-                && StringUtils.equals(countyBo.getCountry().getAlternateCode(), "USA"));
-
+    public void testPostalCodeBoDataObject() throws Exception {
+        assertTrue("PostalCodeBo is mapped in JPA", KRADServiceLocator.getDataObjectService().supports(
+                PostalCodeBo.class));
+        PostalCodeBo postalCodeBo = KRADServiceLocator.getDataObjectService().find(PostalCodeBo.class, new PostalCodeId(
+                "US", "47203"));
+        assertTrue("PostalCode BO fetched after save", postalCodeBo != null && StringUtils.equals(
+                postalCodeBo.getCode(), "47203"));
+        assertTrue("PostalCode BO fetched Country BO correctly",
+                postalCodeBo.getCountry() != null && StringUtils.equals(postalCodeBo.getCountry().getAlternateCode(),
+                        "USA"));
+        assertTrue("PostalCode BO fetched State BO correctly", postalCodeBo.getState() != null && StringUtils.equals(
+                postalCodeBo.getState().getCode(), "IN"));
+        assertTrue("PostalCode BO fetched County BO correctly", postalCodeBo.getCounty() != null && StringUtils.equals(
+                postalCodeBo.getCounty().getCode(), "MON"));
     }
 
     @Test
-    public void testStateBoDataObject() throws Exception{
+    public void testCountyBoDataObject() throws Exception {
+        assertTrue("CountyBO is not mapped in JPA", KRADServiceLocator.getDataObjectService().supports(CountryBo.class));
+        CountyBo countyBo = KRADServiceLocator.getDataObjectService().find(CountyBo.class, new CountyId("MON", "US", "IN"));
+
+        Assert.assertNotNull( "County BO not retrieved after save", countyBo );
+        Assert.assertEquals( "County name incorrect upon retrieve", "Monroe", countyBo.getName() );
+        Assert.assertEquals( "State code incorrect upon retrieve", "IN", countyBo.getStateCode() );
+
+        Assert.assertNotNull( "State on County BO should not be null", countyBo.getState() );
+        Assert.assertEquals( "State name on county incorrect", "Indiana", countyBo.getState().getName() );
+
+        Assert.assertNotNull( "Country on County BO should not be null", countyBo.getCountry() );
+        Assert.assertEquals( "Country code on county incorrect", "USA", countyBo.getCountry().getAlternateCode() );
+    }
+
+    @Test
+    public void testStateBoDataObject() throws Exception {
         assertTrue("StateBO is mapped in JPA", KRADServiceLocator.getDataObjectService().supports(StateBo.class));
-        setupStateBoDataObjectAndSave();
 
-        StateBo stateBo = KRADServiceLocator.getDataObjectService().find(StateBo.class,new StateId("IN","US"));
-        assertTrue("State BO fetched after save", stateBo != null && StringUtils.equals(stateBo.getName(),"Indiana"));
-        assertTrue("State BO fetched Country BO correctly",stateBo.getCountry() != null && StringUtils.equals(stateBo.getCountry().getAlternateCode(),"USA"));
+        StateBo stateBo = KRADServiceLocator.getDataObjectService().find(StateBo.class, new StateId("IN", "US"));
+        assertTrue("State BO fetched after save", stateBo != null && StringUtils.equals(stateBo.getName(), "Indiana"));
+        assertTrue("State BO fetched Country BO correctly", stateBo.getCountry() != null && StringUtils.equals(
+                stateBo.getCountry().getAlternateCode(), "USA"));
     }
 
 
     @Test
-    public void testCountryBoDataObject() throws Exception{
+    public void testCountryBoDataObject() throws Exception {
         assertTrue("CountryBO is mapped in JPA", KRADServiceLocator.getDataObjectService().supports(CountryBo.class));
-        setupCountryBoDataObjectAndSave();
 
-        CountryBo countryBo = KRADServiceLocator.getDataObjectService().find(CountryBo.class,"US");
-        assertTrue("Country BO fetched after save", countryBo != null &&
-                                StringUtils.equals(countryBo.getAlternateCode(),"USA"));
+        CountryBo countryBo = KRADServiceLocator.getDataObjectService().find(CountryBo.class, "CA");
+        assertNotNull("Country BO unable to be retrieved", countryBo);
+        assertEquals("Country BO Data incorrect", "CAN",  countryBo.getAlternateCode() );
     }
 
     @Test
-    public void testCampusBoDataObject() throws Exception{
-       assertTrue("CampusBO is mapped in JPA", KRADServiceLocator.getDataObjectService().supports(CampusBo.class));
-       setupCampusBoDataObjectAndSave();
+    public void testCampusBoDataObject() throws Exception {
+        assertTrue("CampusBO is mapped in JPA", KRADServiceLocator.getDataObjectService().supports(CampusBo.class));
 
-       CampusBo campusBo = KRADServiceLocator.getDataObjectService().find(CampusBo.class,"SE");
-       assertTrue("Campus BO fetched after save", campusBo != null && StringUtils.equals(campusBo.getName(),
-               "SouthEast"));
-       assertTrue("Campus Type Bo fetched from Campus BO relationship", campusBo.getCampusType() != null
-                            && StringUtils.equals(campusBo.getCampusType().getName(),"Commuter"));
+        CampusBo campusBo = KRADServiceLocator.getDataObjectService().find(CampusBo.class, "SE");
+        assertTrue("Campus BO fetched after save", campusBo != null && StringUtils.equals(campusBo.getName(),
+                "SouthEast"));
+        assertTrue("Campus Type Bo fetched from Campus BO relationship",
+                campusBo.getCampusType() != null && StringUtils.equals(campusBo.getCampusType().getName(), "Commuter"));
     }
 
     @Test
-    public void testCampusTypeBoDataObject() throws Exception{
+    public void testCampusTypeBoDataObject() throws Exception {
         assertTrue("CampusTypeBo is mapped in JPA", KRADServiceLocator.getDataObjectService().supports(
                 CampusTypeBo.class));
-        setupCampusTypeBoDataObjectAndSave();
 
-        CampusTypeBo campusTypeBoFetched = KRADServiceLocator.getDataObjectService().find(CampusTypeBo.class,"C");
-        assertTrue("Campus Type BO refetched after save", campusTypeBoFetched != null &&
-                            campusTypeBoFetched.getName().equals("Commuter"));
+        CampusTypeBo campusTypeBoFetched = KRADServiceLocator.getDataObjectService().find(CampusTypeBo.class, "C");
+        assertTrue("Campus Type BO refetched after save",
+                campusTypeBoFetched != null && campusTypeBoFetched.getName().equals("Commuter"));
     }
 
     @Test
-    public void testCampusServiceImplJPA() throws Exception{
-        setupCampusBoDataObjectAndSave();
+    public void testCampusServiceImplJPA() throws Exception {
         Campus campusBo = LocationApiServiceLocator.getCampusService().getCampus("SE");
-        assertTrue("getCampusService retrieved correct call", campusBo != null
-                && StringUtils.equals(campusBo.getCode(),"SE"));
+        assertTrue("getCampusService retrieved correct call", campusBo != null && StringUtils.equals(campusBo.getCode(),
+                "SE"));
         List<Campus> activeCampuses = LocationApiServiceLocator.getCampusService().findAllCampuses();
         assertTrue("findAllCampuses returned result", activeCampuses.size() > 0);
 
         CampusType campusType = LocationApiServiceLocator.getCampusService().getCampusType("C");
-        assertTrue("getCampusType retrieved correctly",campusType != null
-                   && StringUtils.equals(campusType.getName(), "Commuter"));
+        assertTrue("getCampusType retrieved correctly", campusType != null && StringUtils.equals(campusType.getName(),
+                "Commuter"));
 
         List<CampusType> campusTypeList = LocationApiServiceLocator.getCampusService().findAllCampusTypes();
-        assertTrue("findAllCampusTypes retrieved correctly",campusTypeList.size() > 0);
+        assertTrue("findAllCampusTypes retrieved correctly", campusTypeList.size() > 0);
 
         CampusQueryResults results = LocationApiServiceLocator.getCampusService().
                 findCampuses(QueryByCriteria.Builder.forAttribute("code", "SE").build());
-        assertTrue("findCampuses retrieved correctly",results != null && results.getResults().size() == 1);
+        assertTrue("findCampuses retrieved correctly", results != null && results.getResults().size() == 1);
 
         CampusTypeQueryResults resultsType = LocationApiServiceLocator.getCampusService().
                 findCampusTypes(QueryByCriteria.Builder.forAttribute("code", "C").build());
-        assertTrue("findCampuses retrieved correctly",resultsType != null && resultsType.getResults().size() == 1);
+        assertTrue("findCampuses retrieved correctly", resultsType != null && resultsType.getResults().size() == 1);
     }
 
     @Test
-    public void testCountryServiceImplJPA() throws Exception{
-        setupCountryBoDataObjectAndSave();
+    public void testCountryServiceImplJPA() throws Exception {
         Country countryBo = LocationApiServiceLocator.getCountryService().getCountry("US");
-        assertTrue("getCountry retrieved correct", countryBo != null &&
-                StringUtils.equals(countryBo.getAlternateCode(),"USA"));
-        Country country = LocationApiServiceLocator.getCountryService().getCountryByAlternateCode("USA");
-        assertTrue("getCountryByAlternateCode retrieved correctly", country != null &&
-                  StringUtils.equals(country.getCode(), "US"));
+
+        assertNotNull("Country BO unable to be retrieved", countryBo);
+        assertEquals("Country BO Data incorrect", "USA",  countryBo.getAlternateCode() );
+
+        countryBo = LocationApiServiceLocator.getCountryService().getCountryByAlternateCode("USA");
+
+        assertNotNull("Country BO unable to be retrieved", countryBo);
+        assertEquals("Country BO Data incorrect", "US",  countryBo.getCode() );
+
         List<Country> countryList = LocationApiServiceLocator.getCountryService().findAllCountries();
-        assertTrue("findAllCountries retrieved correctly",countryList != null && countryList.size() == 1);
+        assertNotNull("Returned country list should not have been null", countryList);
+        assertEquals("Find all countries returned wrong number of results", 2, countryList.size());
 
         countryList = LocationApiServiceLocator.getCountryService().findAllCountriesNotRestricted();
-        assertTrue("findAllCountriesNotRestricted retrieved correctly",countryList != null && countryList.size() == 1);
+        assertNotNull("Returned country list should not have been null", countryList);
+        assertEquals("findAllCountriesNotRestricted returned wrong number of results", 1, countryList.size());
 
         CountryQueryResults results = LocationApiServiceLocator.getCountryService().
                 findCountries(QueryByCriteria.Builder.forAttribute("code", "US").build());
-        assertTrue("findCountries retrieved correctly",results != null && results.getResults().size() == 1);
+        assertNotNull("findCountries country list should not have been null", results);
+        assertNotNull("findCountries.getResults() should not have been null", results.getResults() );
+        assertEquals("findAllCountriesNotRestricted returned wrong number of results", 1, results.getResults().size());
     }
 
     @Test
-    public void testCountyServiceImplJPA() throws Exception{
-        setupCountyBoDataObjectAndSave();
-
-        County county = LocationApiServiceLocator.getCountyService().getCounty("US","IN","MON");
-        assertTrue("getCounty retrieved correctly",county != null && StringUtils.equals("MON", county.getCode()));
+    public void testCountyServiceImplJPA() throws Exception {
+        County county = LocationApiServiceLocator.getCountyService().getCounty("US", "IN", "MON");
+        assertTrue("getCounty retrieved correctly", county != null && StringUtils.equals("MON", county.getCode()));
 
         CountyQueryResults results = LocationApiServiceLocator.getCountyService().findCounties(
-                    QueryByCriteria.Builder.forAttribute("code","MON").build());
-        assertTrue("findCounties retrieved correctly",results != null && results.getResults().size() == 1);
+                QueryByCriteria.Builder.forAttribute("code", "MON").build());
+        assertTrue("findCounties retrieved correctly", results != null && results.getResults().size() == 1);
 
         List<County> counties = LocationApiServiceLocator.getCountyService().
-                            findAllCountiesInCountryAndState("US","IN");
-        assertTrue("findAllCountiesInCountryAndState retrieved correctly",counties != null && counties.size() == 1);
+                findAllCountiesInCountryAndState("US", "IN");
+        assertTrue("findAllCountiesInCountryAndState retrieved correctly", counties != null && counties.size() == 1);
     }
 
     @Test
-    public void testStateServiceImplJPA() throws Exception{
-        setupStateBoDataObjectAndSave();
-
-        State state = LocationApiServiceLocator.getStateService().getState("US","IN");
-        assertTrue("getState retrieved correctly", state != null && StringUtils.equals("IN",state.getCode()));
+    public void testStateServiceImplJPA() throws Exception {
+        State state = LocationApiServiceLocator.getStateService().getState("US", "IN");
+        assertTrue("getState retrieved correctly", state != null && StringUtils.equals("IN", state.getCode()));
         List<State> stateList = LocationApiServiceLocator.getStateService().findAllStatesInCountry("US");
         assertTrue("findAllStatesInCountry retrieved correctly", stateList != null && stateList.size() == 1);
         stateList = LocationApiServiceLocator.getStateService().findAllStatesInCountryByAltCode("USA");
         assertTrue("findAllStatesInCountryByAltCode retrieved correctly", stateList != null && stateList.size() == 1);
         StateQueryResults results = LocationApiServiceLocator.getStateService().findStates(
-                        QueryByCriteria.Builder.forAttribute("code","IN").build());
-        assertTrue("findStates retrieved correctly",results != null && results.getResults().size() == 1);
+                QueryByCriteria.Builder.forAttribute("code", "IN").build());
+        assertTrue("findStates retrieved correctly", results != null && results.getResults().size() == 1);
     }
 
     @Test
-    public void testPostalCodeServiceImplJPA() throws Exception{
-        setupPostalCodeBoDataObjectAndSave();
-
-        PostalCode postalCode = LocationApiServiceLocator.getPostalCodeService().getPostalCode("US","47203");
-        assertTrue("getPostalCode retrieved correctly",postalCode != null &&
-                                StringUtils.equals(postalCode.getCode(),"47203"));
+    public void testPostalCodeServiceImplJPA() throws Exception {
+        PostalCode postalCode = LocationApiServiceLocator.getPostalCodeService().getPostalCode("US", "47203");
+        assertTrue("getPostalCode retrieved correctly", postalCode != null && StringUtils.equals(postalCode.getCode(),
+                "47203"));
         List<PostalCode> postalCodeList = LocationApiServiceLocator.getPostalCodeService().
                 findAllPostalCodesInCountry("US");
         assertTrue("findAllPostalCodesInCountry retrieved correctly",
                 postalCodeList != null && postalCodeList.size() == 1);
         PostalCodeQueryResults results = LocationApiServiceLocator.getPostalCodeService().
                 findPostalCodes(QueryByCriteria.Builder.forAttribute("code", "47203").build());
-        assertTrue("findPostalCodes retrieved correctly",results != null && results.getResults().size()==1);
+        assertTrue("findPostalCodes retrieved correctly", results != null && results.getResults().size() == 1);
     }
 
-    private void setupPostalCodeBoDataObjectAndSave(){
-        setupCountyBoDataObjectAndSave();
-        PostalCodeBo postalCodeBo = new PostalCodeBo();
-        postalCodeBo.setActive(true);
-        postalCodeBo.setCityName("Bloomington");
-        postalCodeBo.setCode("47203");
-        postalCodeBo.setCountryCode("US");
-        postalCodeBo.setCountyCode("MON");
-        postalCodeBo.setStateCode("IN");
+    private void setupPostalCodeBoDataObjectAndSave() {
+        KRADServiceLocator.getDataObjectService().flush(PostalCodeBo.class);
+        if ( KRADServiceLocator.getDataObjectService().find(PostalCodeBo.class, new PostalCodeId("US", "47203")) == null ) {
+            setupCountyBoDataObjectAndSave();
+            PostalCodeBo postalCodeBo = new PostalCodeBo();
+            postalCodeBo.setActive(true);
+            postalCodeBo.setCityName("Bloomington");
+            postalCodeBo.setCode("47203");
+            postalCodeBo.setCountryCode("US");
+            postalCodeBo.setCountyCode("MON");
+            postalCodeBo.setStateCode("IN");
 
-        KRADServiceLocator.getDataObjectService().save(postalCodeBo);
+            KRADServiceLocator.getDataObjectService().save(postalCodeBo);
+        }
     }
 
-    private void setupCountyBoDataObjectAndSave(){
-        setupStateBoDataObjectAndSave();
-        CountyBo countyBo = new CountyBo();
-        countyBo.setActive(true);
-        countyBo.setCode("MON");
-        countyBo.setCountryCode("US");
-        countyBo.setName("Monroe");
-        countyBo.setStateCode("IN");
+    private void setupCountyBoDataObjectAndSave() {
+        KRADServiceLocator.getDataObjectService().flush(CountyBo.class);
+        if ( KRADServiceLocator.getDataObjectService().find(CountyBo.class, new CountyId("MON", "US", "IN")) == null ) {
+            setupStateBoDataObjectAndSave();
+            CountyBo countyBo = new CountyBo();
+            countyBo.setActive(true);
+            countyBo.setCode("MON");
+            countyBo.setCountryCode("US");
+            countyBo.setName("Monroe");
+            countyBo.setStateCode("IN");
 
-        KRADServiceLocator.getDataObjectService().save(countyBo);
+            countyBo = KRADServiceLocator.getDataObjectService().save(countyBo);
+        }
     }
 
-    private void setupStateBoDataObjectAndSave(){
+    private void setupStateBoDataObjectAndSave() {
         setupCountryBoDataObjectAndSave();
-        StateBo stateBo = new StateBo();
-        stateBo.setActive(true);
-        stateBo.setCode("IN");
-        stateBo.setCountryCode("US");
-        stateBo.setName("Indiana");
+        KRADServiceLocator.getDataObjectService().flush(StateBo.class);
+        if ( KRADServiceLocator.getDataObjectService().find(StateBo.class, new StateId( "IN", "US" )) == null ) {
+            StateBo stateBo = new StateBo();
+            stateBo.setActive(true);
+            stateBo.setCode("IN");
+            stateBo.setCountryCode("US");
+            stateBo.setName("Indiana");
 
-        KRADServiceLocator.getDataObjectService().save(stateBo);
+            KRADServiceLocator.getDataObjectService().save(stateBo);
+        }
     }
 
-    private void setupCountryBoDataObjectAndSave(){
-        CountryBo countryBo = new CountryBo();
-        countryBo.setActive(true);
-        countryBo.setAlternateCode("USA");
-        countryBo.setCode("US");
-        countryBo.setName("United States of America");
-        countryBo.setRestricted(false);
+    private void setupCountryBoDataObjectAndSave() {
+        KRADServiceLocator.getDataObjectService().flush(CountryBo.class);
+        if ( KRADServiceLocator.getDataObjectService().find(CountryBo.class, "US") == null ) {
+            CountryBo countryBo = new CountryBo();
+            countryBo.setActive(true);
+            countryBo.setAlternateCode("USA");
+            countryBo.setCode("US");
+            countryBo.setName("UNITED STATES");
+            countryBo.setRestricted(false);
 
-        KRADServiceLocator.getDataObjectService().save(countryBo);
+            KRADServiceLocator.getDataObjectService().save(countryBo);
+
+            countryBo = new CountryBo();
+            countryBo.setActive(true);
+            countryBo.setAlternateCode("CAN");
+            countryBo.setCode("CA");
+            countryBo.setName("Canada");
+            countryBo.setRestricted(true);
+
+            KRADServiceLocator.getDataObjectService().save(countryBo);
+        }
     }
 
-    private void setupCampusBoDataObjectAndSave(){
-        setupCampusTypeBoDataObjectAndSave();
-        CampusBo campusBo = new CampusBo();
-        campusBo.setActive(true);
-        campusBo.setCampusTypeCode("C");
-        campusBo.setCode("SE");
-        campusBo.setName("SouthEast");
-        campusBo.setShortName("SouthE");
+    private void setupCampusBoDataObjectAndSave() {
+        KRADServiceLocator.getDataObjectService().flush(CampusBo.class);
+        if ( KRADServiceLocator.getDataObjectService().find(CampusBo.class, "SE") == null ) {
+            setupCampusTypeBoDataObjectAndSave();
+            CampusBo campusBo = new CampusBo();
+            campusBo.setActive(true);
+            campusBo.setCampusTypeCode("C");
+            campusBo.setCode("SE");
+            campusBo.setName("SouthEast");
+            campusBo.setShortName("SouthE");
 
-        KRADServiceLocator.getDataObjectService().save(campusBo);
+            KRADServiceLocator.getDataObjectService().save(campusBo);
+        }
     }
 
-    private void setupCampusTypeBoDataObjectAndSave(){
-        CampusTypeBo campusTypeBo = new CampusTypeBo();
-        campusTypeBo.setActive(true);
-        campusTypeBo.setCode("C");
-        campusTypeBo.setName("Commuter");
+    private void setupCampusTypeBoDataObjectAndSave() {
+        KRADServiceLocator.getDataObjectService().flush(CampusTypeBo.class);
+        if ( KRADServiceLocator.getDataObjectService().find(CampusTypeBo.class, "C") == null ) {
+            CampusTypeBo campusTypeBo = new CampusTypeBo();
+            campusTypeBo.setActive(true);
+            campusTypeBo.setCode("C");
+            campusTypeBo.setName("Commuter");
 
-        KRADServiceLocator.getDataObjectService().save(campusTypeBo);
+            KRADServiceLocator.getDataObjectService().save(campusTypeBo);
+        }
     }
 
 

@@ -77,7 +77,7 @@ public class DemoTravelAccountAuthorizationAft extends WebDriverLegacyITBase {
 
     @Override
     protected void navigate() throws Exception {
-        waitAndClickById("Demo-DemoLink", "");
+        waitAndClickDemoLink();
         waitAndClickByLinkText("Travel Authorization Document");
     }
 
@@ -153,28 +153,24 @@ public class DemoTravelAccountAuthorizationAft extends WebDriverLegacyITBase {
     }
     
     @Test
-    @Ignore // https://jira.kuali.org/browse/RICEQA-467 AFT Failure DemoTravelAccountAuthorizationAft intermittent Column TRVL_AUTH_DOC_ID cannot be null
     public void testTravelAccountAuthorizationSubmitNav() throws Exception {
         testTravelAccountAuthorizationSubmit();
         passed();
     }
     
     @Test
-    @Ignore // https://jira.kuali.org/browse/RICEQA-467 AFT Failure DemoTravelAccountAuthorizationAft intermittent Column TRVL_AUTH_DOC_ID cannot be null
     public void testTravelAccountAuthorizationBlanketApproveNav() throws Exception {
         testTravelAccountAuthorizationBlanketApprove();
         passed();
     }
 
     @Test
-    @Ignore // https://jira.kuali.org/browse/RICEQA-467 AFT Failure DemoTravelAccountAuthorizationAft intermittent Column TRVL_AUTH_DOC_ID cannot be null
     public void testTravelAccountAuthorizationSubmitBookmark() throws Exception {
     	testTravelAccountAuthorizationSubmit();
         passed();
     }
     
     @Test
-    @Ignore // https://jira.kuali.org/browse/RICEQA-467 AFT Failure DemoTravelAccountAuthorizationAft intermittent Column TRVL_AUTH_DOC_ID cannot be null
     public void testTravelAccountAuthorizationBlanketApproveBookmark() throws Exception {
         testTravelAccountAuthorizationBlanketApprove();
         passed();

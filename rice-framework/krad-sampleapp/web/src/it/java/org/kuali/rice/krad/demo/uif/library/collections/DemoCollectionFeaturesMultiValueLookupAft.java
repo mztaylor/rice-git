@@ -37,7 +37,7 @@ public class DemoCollectionFeaturesMultiValueLookupAft extends WebDriverLegacyIT
     @Override
     protected void navigate() throws Exception {
         jGrowl("Click the Library Link");
-        waitAndClickById("Demo-LibraryLink", "");
+        waitAndClickLibraryLink();
         waitAndClickByLinkText("Collection Features");
         waitAndClickByLinkText("Multi-Value Lookup");
     }
@@ -64,10 +64,8 @@ public class DemoCollectionFeaturesMultiValueLookupAft extends WebDriverLegacyIT
 
     private void lightBoxLookupAddMultipleLines() throws InterruptedException {
         waitAndClickByLinkText("Lookup/Add Multiple Lines");
-
-        driver.switchTo().frame(driver.findElement(By.cssSelector(".fancybox-iframe")));
-        selectTopFrame();
-        gotoIframeByXpath("//iframe[@class='fancybox-iframe']");
+        gotoLightBox();
+        gotoLightBoxIframe();
     }
 
     @Test

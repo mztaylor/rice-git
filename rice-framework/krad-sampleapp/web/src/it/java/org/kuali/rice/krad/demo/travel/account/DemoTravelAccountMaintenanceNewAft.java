@@ -20,6 +20,7 @@ import org.kuali.rice.testtools.selenium.WebDriverUtils;
 import org.openqa.selenium.By;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author Kuali Rice Team (rice.collab@kuali.org)
@@ -30,11 +31,6 @@ public class DemoTravelAccountMaintenanceNewAft extends WebDriverLegacyITBase {
      * //div[@class='fancybox-item fancybox-close']
      */
     public static final String FANCY_BOX_CLOSE_XPATH = "//div[@class='fancybox-item fancybox-close']";
-
-    /**
-     * //div[@class='fancybox-item fancybox-close']
-     */
-    public static final String FANCY_BOX_IFRAME_XPATH = "//iframe[@class='fancybox-iframe']";
 
     /**
      * /kr-krad/maintenance?methodToCall=start&dataObjectClassName=org.kuali.rice.krad.demo.travel.dataobject.TravelAccount&hideReturnLink=true
@@ -102,7 +98,7 @@ public class DemoTravelAccountMaintenanceNewAft extends WebDriverLegacyITBase {
     }
 
     protected void navigate() throws Exception {
-        waitAndClickById("Demo-DemoLink", "");
+        waitAndClickDemoLink();
         waitAndClickByLinkText("Travel Account Maintenance (New)");
     }
 
@@ -112,7 +108,8 @@ public class DemoTravelAccountMaintenanceNewAft extends WebDriverLegacyITBase {
         String randomCode = RandomStringUtils.randomAlphabetic(9).toUpperCase();
         waitAndTypeByName("document.newMaintainableObject.dataObject.number",randomCode);
         waitAndTypeByName("document.newMaintainableObject.dataObject.name","Test Account Name");
-        waitAndClickByXpath("//a[@class='uif-actionLink icon-search']","icon-search link not found");
+        waitAndClickByXpath("//button[@class='btn btn-default uif-action icon-search']",
+                "Travel Account Type Code icon-search link not found");
         gotoLightBox();
         waitAndClickSearchByText();
         waitForElementNotPresent(By.xpath("//button[contains(text(),'Add New Line')]"));
@@ -133,6 +130,16 @@ public class DemoTravelAccountMaintenanceNewAft extends WebDriverLegacyITBase {
         waitAndClickConfirmationOk();
         failOnErrorMessageItem();
         waitForTextPresent("Document was successfully submitted.", WebDriverUtils.configuredImplicityWait() * 2);
+
+        //unlock record
+        WebElement webElement = findElement(By.xpath("./html/body/form/div/header/div/table/tbody/tr[1]/td[1]/div"));
+        String documentId = webElement.getText();
+        if(documentId != "") {
+            open(getBaseUrlString() + "/kew/DocHandler.do?docId=" + documentId + "&command=displayActionListView");
+            waitAndClickByXpath("/html/body/form/div/div[2]/main/section[7]/header/h3/a/span/span[1]");
+            waitAndTypeByXpath("/html/body/form/div/div[2]/main/section[7]/div/div[1]/textarea", "test");
+            waitAndClickByXpath("/html/body/form/div/div[2]/main/section[7]/div/div[2]/button[2]");
+        }
     }
 
     protected void testTravelAccountMaintenanceEditXss() throws Exception {

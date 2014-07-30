@@ -48,6 +48,7 @@ import org.kuali.rice.krad.uif.view.ExpressionEvaluator;
 import org.kuali.rice.krad.uif.view.ExpressionEvaluatorFactory;
 import org.kuali.rice.krad.uif.view.View;
 import org.kuali.rice.krad.util.KRADConstants;
+import org.kuali.rice.krad.web.form.UifFormBase;
 
 /**
  * Lifecycle object created during the view processing to hold event registrations.
@@ -207,6 +208,13 @@ public class ViewLifecycle implements Serializable {
      */
     public static Component performComponentLifecycle(View view, Object model, HttpServletRequest request,
             ViewPostMetadata viewPostMetadata, String componentId) {
+        if (viewPostMetadata == null) {
+            UifFormBase form = (UifFormBase) model;
+
+            throw new RuntimeException("View post metadata is null which cannot occur for refresh. Form id: "
+                    + form.getFormKey() + ", requested form id: " + form.getRequestedFormKey());
+        }
+
         ComponentPostMetadata componentPostMetadata = viewPostMetadata.getComponentPostMetadata(componentId);
         if ((componentPostMetadata == null) || componentPostMetadata.isDetachedComponent()) {
             if (componentPostMetadata == null) {
@@ -480,7 +488,9 @@ public class ViewLifecycle implements Serializable {
         if (ViewLifecycle.isStrict()) {
             throw illegalState;
         } else {
-            LOG.warn(illegalState.getMessage(), illegalState);
+            if(LOG.isTraceEnabled()) {
+                LOG.trace(illegalState.getMessage(), illegalState);
+            }
         }
     }
 
@@ -648,7 +658,9 @@ public class ViewLifecycle implements Serializable {
         try {
             return processor == null ? null : processor.getActivePhase();
         } catch (IllegalStateException e) {
-            LOG.debug("No lifecycle phase is active on the current processor", e);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("No lifecycle phase is active on the current processor", e);
+            }
             return null;
         }
     }

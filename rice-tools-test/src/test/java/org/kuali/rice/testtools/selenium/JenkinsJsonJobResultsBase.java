@@ -51,14 +51,14 @@ public class JenkinsJsonJobResultsBase {
     public static final String BROWSER_HELPER_APPS_NEVER_ASK_SAVE_TO_DISK = "browser.helperApps.neverAsk.saveToDisk";
 
     /**
-     * REQUIRED -Dcas.username= CAS username.
+     * -Dcas.username= CAS username.
      */
-    public static final String CAS_USERNAME = "cas.username";
+    private static final String CAS_USERNAME = "cas.username";
 
     /**
-     * REQUIRED -Dcas.password= CAS password.
+     * -Dcas.password= CAS password.
      */
-    public static final String CAS_PASSWORD = "cas.password";
+    private static final String CAS_PASSWORD = "cas.password";
 
     /**
      * -Djenkins.base.url= default is http://ci.rice.kuali.org.
@@ -66,7 +66,7 @@ public class JenkinsJsonJobResultsBase {
     public static final String JENKINS_BASE_URL = "jenkins.base.url";
 
     /**
-     * -Djenkins.jobs= comma delimited with optional colon delimited list of jobs:jobNumbers default is rice-2.4-smoke-test.
+     * REQUIRED -Djenkins.jobs= comma delimited with optional colon delimited list of jobs:jobNumbers.
      *
      * If no jobNumbers are included the last completed build number for the given job will be used.  If "all" is given for
      * the jobNumbers all available job builds will be used.
@@ -89,7 +89,12 @@ public class JenkinsJsonJobResultsBase {
     String downloadDir;
 
     public void setUp() throws MalformedURLException, InterruptedException {
-        jenkinsBase = System.getProperty(JENKINS_BASE_URL, "http://ci.rice.kuali.org");
+        if (System.getProperty(JENKINS_JOBS) == null) {
+            System.out.println("Don't know what jobs to retrieve.  -D" + JENKINS_JOBS + "= must be declared.");
+            System.exit(1);
+        }
+
+        jenkinsBase = System.getProperty(JENKINS_BASE_URL, "http://ci.kuali.org");
         outputDirectory = System.getProperty(JSON_OUTPUT_DIR);
 
         FirefoxProfile profile = new FirefoxProfile();
@@ -110,20 +115,20 @@ public class JenkinsJsonJobResultsBase {
         driver.get(jenkinsBase + "/login?form");
 
         // CAS
-        WebDriverUtils.waitFor(driver, WebDriverUtils.configuredImplicityWait(), By.id("username"),
-                this.getClass().toString());
-        driver.findElement(By.id("username")).sendKeys(System.getProperty(CAS_USERNAME));
-        driver.findElement(By.id("password")).sendKeys(System.getProperty(CAS_PASSWORD));
-        driver.findElement(By.name("submit")).click();
-        Thread.sleep(1000);
-
-        exitOnLoginProblems();
+//        WebDriverUtils.waitFor(driver, WebDriverUtils.configuredImplicityWait(), By.id("username"),
+//                this.getClass().toString());
+//        driver.findElement(By.id("username")).sendKeys(System.getProperty(CAS_USERNAME));
+//        driver.findElement(By.id("password")).sendKeys(System.getProperty(CAS_PASSWORD));
+//        driver.findElement(By.name("submit")).click();
+//        Thread.sleep(1000);
+//
+//        exitOnLoginProblems();
 
         // Jenkins login page (don't login, we have authenticated through CAS already
         WebDriverUtils.waitFor(driver, WebDriverUtils.configuredImplicityWait(), By.xpath("//span[contains(text(), 'Page generated')]"), this.getClass().toString());
 
         // setup jobs builds
-        jobsBuildsStrings = System.getProperty(JENKINS_JOBS, "rice-2.4-smoke-test").split("[,\\s]");
+        jobsBuildsStrings = System.getProperty(JENKINS_JOBS).split("[,\\s]");
         String job;
         for (String jobsBuildsString : jobsBuildsStrings) {
             if (jobsBuildsString.contains(":")) {
@@ -248,7 +253,9 @@ public class JenkinsJsonJobResultsBase {
 
         outputFile = calcOutputFile(job, jobNumber);
 
-        json = json.replaceAll("}],", "}],\n");
+        // Add some end of lines to avoid the entire file being written out as 1 line
+        json = json.replaceAll("}],", "}],\n\n");
+
         FileUtils.writeStringToFile(new File(outputFile), json);
     }
 

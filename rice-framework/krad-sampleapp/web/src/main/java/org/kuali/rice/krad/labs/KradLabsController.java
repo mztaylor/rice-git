@@ -25,6 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -68,6 +69,14 @@ public class KradLabsController extends UifControllerBase {
     @Override
     public void setFileControllerService(FileControllerService fileControllerService) {
         super.setFileControllerService(fileControllerService);
+    }
+
+    @Override
+    @RequestMapping(method = RequestMethod.POST, params = "methodToCall=saveField")
+    public ModelAndView saveField(UifFormBase uifForm) throws Exception {
+        GlobalVariables.getMessageMap().putError("dataField3", "serverTestError");
+        // Hook method for saving individual fields
+        return refresh(uifForm);
     }
 
 }

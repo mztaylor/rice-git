@@ -578,6 +578,10 @@ public abstract class WebDriverLegacyITBase extends WebDriverAftBase {
         waitForTextPresent("No values match this search.");
     }
 
+    protected void assertRouteStatus(String status) throws InterruptedException {
+        waitForElementPresentByXpath("//th[contains(.,'Route Status')]/../following-sibling::*/td[contains(.,'" + status + "')]");
+    }
+
     protected void assertTableLayout() throws Exception {
         waitForTextPresent("Actions");
         String pageSource = driver.getPageSource();
@@ -864,58 +868,67 @@ public abstract class WebDriverLegacyITBase extends WebDriverAftBase {
         selectOptionByName("document.groupNamespace", nameSpace);
         waitAndTypeByName("document.groupName", groupName);
         waitAndTypeByName("document.groupDescription", groupDescription);
-
-        // Add Ad hoc Recipient
-        addAdHocRecipientsPerson(new String[]{"dev1", "F"}); // "One, Developer"
-
-        // Add Ad hoc Workgroup
-        waitAndClickByName("methodToCall.performLookup.(!!org.kuali.rice.kim.impl.group.GroupBo!!).(((namespaceCode:newAdHocRouteWorkgroup.recipientNamespaceCode,name:newAdHocRouteWorkgroup.recipientName))).((`newAdHocRouteWorkgroup.recipientNamespaceCode:namespaceCode,newAdHocRouteWorkgroup.recipientName:name`)).((<>)).(([])).((**)).((^^)).((&&)).((//)).((~~)).(::::;;::::).anchor");
-        waitForElementPresentByXpath(SEARCH_XPATH);
-        selectOptionByName("namespaceCode", nameSpace);
-        waitAndClickSearch();
-        Thread.sleep(2000);
-        String adHocWrkGrp = null;
-        if (isTextPresent("No values match this search.")) {
-            waitAndClickByXpath(CANCEL3_XPATH);
-        } else {
-            waitAndClickReturnValue();
-            waitAndClickByName("methodToCall.insertAdHocRouteWorkgroup");
-            adHocWrkGrp = findElement(By.name("adHocRouteWorkgroup[0].recipientName")).getAttribute("value");
-        }
-
+        
         checkByName("document.active");
         waitAndClickByXpath(SAVE_XPATH_2);
         waitForTextPresent("Document was successfully saved.");
+    }
+    
+    protected void testAddingBrownGroupSubmit() throws Exception {
+    	selectFrameIframePortlet();
+        waitAndCreateNew();
+        String docId = waitForDocId();
+        String random = RandomStringUtils.randomNumeric(4);
+        String organizationDocumentNumber = "ORD" + random;
+        String groupDescription = "GD" + random;
+        String groupName = "BrownGroup " + AutomatedFunctionalTestUtils.createUniqueDtsPlusTwoRandomChars();
+        String nameSpace = "KR-IDM";
+        String today = getDateToday();
+        acceptAlertIfPresent();
+        Calendar nextYearCal = Calendar.getInstance();
+        nextYearCal.add(Calendar.YEAR, 1);
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        String nextYear = sdf.format(nextYearCal.getTime());
 
-        //checks it is saved and initiator is admin.
-        assertEquals(DOC_STATUS_SAVED, findElement(By.xpath("//table[@class='headerinfo']/tbody/tr[1]/td[2]")).getText());
-        assertEquals("admin", findElement(By.xpath("//table[@class='headerinfo']/tbody/tr[2]/td[1]/a")).getText());
-        waitAndClickByName("methodToCall.performLookup.(!!org.kuali.rice.kim.impl.identity.PersonImpl!!).(((principalId:member.memberId,principalName:member.memberName))).((``)).((<>)).(([])).((**)).((^^)).((&&)).((//)).((~~)).(::::;;::::).anchorAssignees");
-        waitAndClickSearch();
-        String adHocPerson = waitForElementPresentByXpath("//table[@id='row']/tbody/tr/td[2]/a").getText();
-        waitAndClickReturnValue();
-        waitAndClickByName("methodToCall.addMember.anchorAssignees");
-        waitAndClickSave();
-        waitAndClickSubmit();
-        waitForElementPresentByXpath(DOC_SUBMIT_SUCCESS_MSG_XPATH, "Document is not submitted successfully");
-        selectTopFrame();
+        //Enter details for BrownGroup.
+        waitAndTypeByName("document.documentHeader.documentDescription", "Adding Brown Group");
+        waitAndTypeByName("document.documentHeader.explanation", "I want to add Brown Group to test KIM");
+        waitAndTypeByName("document.documentHeader.organizationDocumentNumber", organizationDocumentNumber);
+        selectOptionByName("document.groupNamespace", nameSpace);
+        waitAndTypeByName("document.groupName", groupName);
+        waitAndTypeByName("document.groupDescription", groupDescription);
 
-        // Verify Document Overview info
-        docSearch(docId);
-        waitAndClickByLinkText(docId);
-        switchToWindow("Kuali :: Group");
-        assertTextPresent(new String[]{"Adding Brown Group", "I want to add Brown Group to test KIM", organizationDocumentNumber});
-        waitAndClickByName("methodToCall.close");
+        checkByName("document.active");
+        waitAndClickByXpath(SUBMIT_XPATH);
+    }
+    
+    protected void testAddingBrownGroupSaveSubmit() throws Exception {
+    	selectFrameIframePortlet();
+        waitAndCreateNew();
+        String docId = waitForDocId();
+        String random = RandomStringUtils.randomNumeric(4);
+        String organizationDocumentNumber = "ORD" + random;
+        String groupDescription = "GD" + random;
+        String groupName = "BrownGroup " + AutomatedFunctionalTestUtils.createUniqueDtsPlusTwoRandomChars();
+        String nameSpace = "KR-IDM";
+        String today = getDateToday();
+        Calendar nextYearCal = Calendar.getInstance();
+        nextYearCal.add(Calendar.YEAR, 1);
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        String nextYear = sdf.format(nextYearCal.getTime());
 
-        waitAndClickByLinkText("Administration");
-        waitAndClickByLinkText("Group");
-        selectFrameIframePortlet();
-        waitAndTypeByName("name", groupName);
-        waitAndClickSearch();
-        waitForElementPresent(By.linkText(groupName), docId + " with groupName "+ groupName + " not present!");
-        waitAndClickByLinkText("edit");
-        waitAndClickByName("methodToCall.showAllTabs");
-        assertTextPresent(new String[]{adHocPerson, groupDescription, nameSpace, groupName});
+        //Enter details for BrownGroup.
+        waitAndTypeByName("document.documentHeader.documentDescription", "Adding Brown Group");
+        waitAndTypeByName("document.documentHeader.explanation", "I want to add Brown Group to test KIM");
+        waitAndTypeByName("document.documentHeader.organizationDocumentNumber", organizationDocumentNumber);
+        selectOptionByName("document.groupNamespace", nameSpace);
+        waitAndTypeByName("document.groupName", groupName);
+        waitAndTypeByName("document.groupDescription", groupDescription);
+
+        waitAndClickByXpath(SAVE_XPATH_2);
+        waitForTextPresent("Document was successfully saved.");
+        waitAndClickByXpath(SUBMIT_XPATH);
+        waitForTextPresent("Document was successfully submitted.");
     }
 
     protected void testAttributeDefinitionLookUp() throws Exception {
@@ -952,7 +965,6 @@ public abstract class WebDriverLegacyITBase extends WebDriverAftBase {
 
     protected void testCancelConfirmation() throws InterruptedException {
         waitAndCancelConfirmation();
-        passed();
     }
 
     protected void testConfigParamaterBlanketApprove() throws Exception {
@@ -1053,6 +1065,44 @@ public abstract class WebDriverLegacyITBase extends WebDriverAftBase {
         createNewEnterDetails();
         testCancelConfirmation();
         assertDocSearchNoResults(docId);
+    }
+    
+    protected void testCreateNewSave() throws Exception {
+        selectFrameIframePortlet();
+        waitAndCreateNew();
+        String docId = verifyDocInitiated();
+        createNewEnterDetails();
+        waitAndClickSave();
+        waitForElementPresentByXpath(SAVE_SUCCESSFUL_XPATH);
+        assertDocSearch(docId, "SAVED");
+        waitAndClickRouteLogIcon();
+        assertRouteStatus("SAVED");
+    }
+
+    protected void testCreateNewSubmit() throws Exception {
+        selectFrameIframePortlet();
+        waitAndCreateNew();
+        String docId = verifyDocInitiated();
+        createNewEnterDetails();
+        waitAndClickSubmit();
+        waitForElementPresentByXpath(DOC_SUBMIT_SUCCESS_MSG_XPATH);
+        assertDocSearch(docId, "FINAL");
+        waitAndClickRouteLogIcon();
+        assertRouteStatus("FINAL");
+    }
+    
+    protected void testCreateNewSaveSubmit() throws Exception {
+        selectFrameIframePortlet();
+        waitAndCreateNew();
+        String docId = verifyDocInitiated();
+        createNewEnterDetails();
+        waitAndClickSave();
+        waitForElementPresentByXpath(SAVE_SUCCESSFUL_XPATH);
+        waitAndClickSubmit();
+        waitForElementPresentByXpath(DOC_SUBMIT_SUCCESS_MSG_XPATH);
+        assertDocSearch(docId, "FINAL");
+        waitAndClickRouteLogIcon();
+        assertRouteStatus("FINAL");
     }
 
     private String verifyDocInitiated() throws InterruptedException {
@@ -2688,6 +2738,14 @@ public abstract class WebDriverLegacyITBase extends WebDriverAftBase {
         Thread.sleep(3000);
     }
 
+    protected void waitAndClickAdministration() throws InterruptedException {
+        waitAndClickByLinkText(ADMINISTRATION_LINK_TEXT, this);
+    }
+
+    protected void waitAndClickClearValues() throws InterruptedException {
+        waitAndClickButtonByText("Clear Values");
+    }
+
     protected void waitAndClickConfirmationOk() throws InterruptedException {
         jGrowl("Click OK Confirmation");
         waitAndClickByXpath("//div[@data-parent='ConfirmSubmitDialog']/button[contains(text(),'OK')]");
@@ -2696,10 +2754,6 @@ public abstract class WebDriverLegacyITBase extends WebDriverAftBase {
     protected void waitAndClickConfirmBlanketApproveOk() throws InterruptedException {
         jGrowl("Click OK Confirmation");
         waitAndClickByXpath("//div[@data-parent='ConfirmBlanketApproveDialog']/button[contains(text(),'OK')]");
-    }
-
-    protected void waitAndClickAdministration() throws InterruptedException {
-        waitAndClickByLinkText(ADMINISTRATION_LINK_TEXT, this);
     }
 
     /**
@@ -2759,6 +2813,11 @@ public abstract class WebDriverLegacyITBase extends WebDriverAftBase {
         waitAndClickByLinkText(COPY_LINK_TEXT);
     }
 
+    protected void waitAndClickDemoLink() throws InterruptedException {
+        jGrowl("Click Demo Link");
+        waitAndClickById("Demo-DemoLink", "");
+    }
+
     /**
      * {}@link #DOC_SEARCH_XPATH}
      * @throws InterruptedException
@@ -2773,6 +2832,11 @@ public abstract class WebDriverLegacyITBase extends WebDriverAftBase {
      */
     protected void waitAndClickDocSearchTitle() throws InterruptedException {
         waitAndClickByXpath(DOC_SEARCH_XPATH_TITLE);
+    }
+
+    protected void waitAndClickLibraryLink() throws InterruptedException {
+        jGrowl("Click Library Link");
+        waitAndClickById("Demo-LibraryLink", "");
     }
 
     /**
@@ -2805,6 +2869,11 @@ public abstract class WebDriverLegacyITBase extends WebDriverAftBase {
      */
     private void waitAndClickMainMenu(JiraAwareFailable failable) throws InterruptedException {
         waitAndClickByLinkText(MAIN_MENU_LINK_TEXT, failable);
+    }
+
+    protected void waitAndClickRouteLogIcon() throws InterruptedException {
+        jGrowl("Click Route Log link");
+        waitAndClickByXpath("//img[@alt=\"Route Log for Document\"]");
     }
 
     /**

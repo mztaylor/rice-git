@@ -116,6 +116,48 @@ public class LinkField extends FieldBase {
     }
 
     /**
+     * The id of the DialogGroup to use when the openInDialog property is true for this LinkField's link.
+     *
+     * <p>The DialogGroup should only contain an iframe for its items.  When not set, a default dialog
+     * will be used.</p>
+     *
+     * @return the id of the dialog to use for this link
+     */
+    @BeanTagAttribute
+    public String getLinkDialogId() {
+        return link.getLinkDialogId();
+    }
+
+    /**
+     * @see LinkField#getLinkDialogId()
+     */
+    public void setLinkDialogId(String linkDialogId) {
+        link.setLinkDialogId(linkDialogId);
+    }
+
+    /**
+     * Indicates whether the link's URL should be opened in a dialog.
+     *
+     * <p>
+     * If set the target attribute is ignored and the URL is opened in a dialog instead.
+     * </p>
+     *
+     * @return true to open link in a dialog, false if not (follow standard target attribute)
+     */
+    @BeanTagAttribute
+    public boolean isOpenInDialog() {
+        return link.isOpenInDialog();
+    }
+
+    /**
+     * @see LinkField#isOpenInDialog()
+     */
+    public void setOpenInDialog(boolean openInDialog) {
+        link.setOpenInDialog(openInDialog);
+    }
+
+
+    /**
      * Returns the target of the <code>Link</code> field that will be used to specify where to open the href.
      *
      * @return The target
@@ -151,31 +193,6 @@ public class LinkField extends FieldBase {
      */
     public void setHref(String hrefText) {
         link.setHref(hrefText);
-    }
-
-    /**
-     * Returns the <code>LightBox</code> used to open the link in
-     *
-     * @return The <code>LightBox</code>
-     */
-    @BeanTagAttribute(type= BeanTagAttribute.AttributeType.DIRECTORBYTYPE)
-    public LightBox getLightBox() {
-        if (link != null) {
-            return link.getLightBox();
-        }
-
-        return null;
-    }
-
-    /**
-     * Setter for the lightBox
-     *
-     * @param lightBox
-     */
-    public void setLightBox(LightBox lightBox) {
-        if (link != null) {
-            link.setLightBox(lightBox);
-        }
     }
 
     @BeanTagAttribute(name = "sortAs")

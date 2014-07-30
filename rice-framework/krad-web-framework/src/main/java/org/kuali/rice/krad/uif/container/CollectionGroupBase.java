@@ -299,8 +299,8 @@ public class CollectionGroupBase extends GroupBase implements CollectionGroup {
             }
         }
 
-        // if we are processing a paging request, invoke the layout managers to carry out the paging,
-        if (viewModel.isCollectionPagingRequest()) {
+        // if we are processing a paging request for this component, invoke the layout managers to carry out the paging
+        if (viewModel.isCollectionPagingRequest() && StringUtils.equals(viewModel.getUpdateComponentId(), getId())) {
             ((CollectionLayoutManager) getLayoutManager()).processPagingRequest(model, this);
         }
 

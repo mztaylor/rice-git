@@ -46,7 +46,7 @@ public class DocSearchAft extends WebDriverLegacyITBase {
         waitForTitleToEqualKualiPortalIndex();
         waitAndClickByLinkText("Document Type");
         waitForTitleToEqualKualiPortalIndex();
-        selectFrame("iframeportlet");
+        selectFrame(IFRAMEPORTLET_NAME);
         waitAndClickByXpath("//img[contains(@alt,'create new')]");
         waitForElementPresentByXpath("//*[@name='methodToCall.route' and @alt='submit']","save button does not exist on the page");
         waitForElementPresentByXpath("//div[@id='headerarea']/div/table/tbody/tr[1]/td[1]");
@@ -178,6 +178,7 @@ public class DocSearchAft extends WebDriverLegacyITBase {
         waitAndClickByName("methodToCall.approve", "approve button does not exist on the page");
         jGrowl("Click Cancel Button");
         waitAndClickByXpath("//a[@href='DocumentSearch.do']/img[@alt='cancel']");
+        waitAndTypeByName("documentId", docId);
         waitAndClickMethodToCallSearchButton();
         waitForPageToLoad();
         assertEquals("FINAL", driver.findElement(By.xpath("//table[@id='row']/tbody/tr[1]/td[4]")).getText());
